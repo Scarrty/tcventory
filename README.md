@@ -52,6 +52,18 @@ php artisan serve
 php artisan test
 ```
 
+## CI-Gates
+
+Der Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) läuft bei Pull Requests und bei Pushes auf den Hauptbranch `main`.
+
+Folgende Quality Gates sind definiert:
+
+- `vendor/bin/pint --test`
+- `vendor/bin/phpstan analyse`
+- `php artisan test`
+
+Für die Testausführung sind in CI Services für MySQL (Datenbank) und Redis konfiguriert.
+
 ## Migrierte projektspezifische Dateien
 
 - `database/migrations/2026_01_01_000001_create_catalog_tables.php`

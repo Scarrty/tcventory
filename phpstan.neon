@@ -1,0 +1,10 @@
+parameters:
+    level: 0
+    paths:
+        - app
+        - config
+        - database
+        - routes
+    ignoreErrors:
+        - '#Access to undefined constant Pdo\\Mysql::ATTR_SSL_CA#'
+        - '#Undefined variable: \$this#'
