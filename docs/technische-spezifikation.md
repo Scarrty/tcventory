@@ -1,5 +1,11 @@
 # Technische Spezifikation – TCventory
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 ## 1. Zielbild und Scope
 
 TCventory ist eine Laravel-12-Anwendung zur Inventar- und Finanzverwaltung von TCG-Produkten mit Backoffice-Fokus.

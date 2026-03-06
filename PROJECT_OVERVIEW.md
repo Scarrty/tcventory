@@ -1,5 +1,11 @@
 # PROJECT_OVERVIEW
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 ## 1. Ziel und Scope
 
 **TCventory** ist eine Webanwendung zur Verwaltung von TCG-Karten und Sealed-Produkten.

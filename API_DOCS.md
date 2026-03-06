@@ -1,5 +1,11 @@
 # API_DOCS
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 ## 1. Überblick
 
 TCventory stellt eine versionierte API unter **`/api/v1`** bereit. Die API ist primär für Integrationen vorgesehen; die Hauptbedienung erfolgt über das Filament-Admin-Interface.

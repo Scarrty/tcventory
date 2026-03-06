@@ -1,5 +1,11 @@
 # CHANGELOG
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 Alle relevanten Änderungen am Projekt werden in dieser Datei dokumentiert.
 
 Das Format orientiert sich an *Keep a Changelog* und verwendet semantische Versionierung als Zielbild.

@@ -1,5 +1,11 @@
 # ROADMAP
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 ## Zielbild
 
 TCventory entwickelt sich von einer dokumentierten Basis zu einer produktionsnahen Inventar- und Finanzplattform für TCG-Bestände mit nachvollziehbaren Inventarbewegungen, belastbaren Finanzkennzahlen und auditfähigen Prozessen.
