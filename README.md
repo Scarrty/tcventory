@@ -52,9 +52,9 @@ php artisan serve
 php artisan test
 ```
 
-## CI-Gates
+## CI/CD
 
-Der Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) läuft bei Pull Requests und bei Pushes auf den Hauptbranch `main`.
+Der Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) läuft bei Pull Requests und bei Pushes auf `main`.
 
 Folgende Quality Gates sind definiert:
 
@@ -63,6 +63,33 @@ Folgende Quality Gates sind definiert:
 - `php artisan test`
 
 Für die Testausführung sind in CI Services für PostgreSQL (Datenbank) und Redis konfiguriert.
+
+Zusätzlich läuft bei jedem veröffentlichten GitHub Release der CD-Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml):
+
+- Build + Push von `app` und `web` Docker-Images in GHCR
+- Tagging mit `<release-tag>` und `latest`
+- Erzeugung einer release-spezifischen `docker-compose.release.yml` als Release-Asset
+
+## Docker & Deployment
+
+Schnellstart mit Docker Compose:
+
+```bash
+cp .env.docker.example .env.docker
+# APP_KEY in .env.docker setzen
+IMAGE_TAG=latest docker compose --env-file .env.docker pull
+IMAGE_TAG=latest docker compose --env-file .env.docker up -d
+```
+
+Empfehlung für Produktion:
+
+- Nutze die `docker-compose.release.yml` aus dem jeweiligen Release.
+- Verwende einen fixen Release-Tag (`IMAGE_TAG=vX.Y.Z`) statt dauerhaft `latest`.
+- Führe nach jedem Deploy Migrationen aus.
+
+Weitere Details inkl. Rollback-Strategie siehe:
+
+- [`docs/deployment/docker-compose-v2.md`](docs/deployment/docker-compose-v2.md)
 
 ## Migrierte projektspezifische Dateien
 
@@ -82,7 +109,3 @@ Für die Testausführung sind in CI Services für PostgreSQL (Datenbank) und Red
   - `Database\\Factories\\` → `database/factories/`
   - `Database\\Seeders\\` → `database/seeders/`
 - Für das User-Modell mit Rollen/Rechten ist `spatie/laravel-permission` als Composer-Abhängigkeit enthalten.
-
-## Deployment (Docker Compose v2)
-
-Siehe `docs/deployment/docker-compose-v2.md` für die Production-ready-light Variante.
