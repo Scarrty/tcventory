@@ -1,0 +1,75 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\StoreSaleRequest;
+use App\Models\Sale;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class SaleController extends Controller
+{
+    public function __construct()
+    {
+        $this->authorizeResource(Sale::class, 'sale');
+    }
+
+    public function index(Request $request): JsonResponse
+    {
+        $perPage = (int) $request->integer('per_page', 15);
+        $sales = Sale::query()->with('items')->latest('id')->paginate(max(1, min($perPage, 100)));
+
+        return response()->json(['data' => $sales->items(), 'meta' => [
+            'current_page' => $sales->currentPage(),
+            'per_page' => $sales->perPage(),
+            'total' => $sales->total(),
+        ]]);
+    }
+
+    public function store(StoreSaleRequest $request): JsonResponse
+    {
+        $payload = $request->validated();
+
+        if (! empty($payload['request_key'])) {
+            $existing = Sale::query()->where('request_key', $payload['request_key'])->with('items')->first();
+            if ($existing instanceof Sale) {
+                return response()->json(['data' => $existing]);
+            }
+        }
+
+        $sale = DB::transaction(function () use ($payload): Sale {
+            $gross = collect($payload['items'])->sum(fn (array $item): float => ((float) $item['unit_price_amount']) * ((int) $item['quantity']));
+
+            $sale = Sale::query()->create([
+                'channel' => $payload['channel'] ?? null,
+                'sold_at' => $payload['sold_at'],
+                'gross_amount' => $gross,
+                'shipping_amount' => $payload['shipping_amount'] ?? 0,
+                'fee_amount' => $payload['fee_amount'] ?? 0,
+                'tax_amount' => $payload['tax_amount'] ?? 0,
+                'net_amount' => $gross - (float) ($payload['fee_amount'] ?? 0) - (float) ($payload['tax_amount'] ?? 0) - (float) ($payload['shipping_amount'] ?? 0),
+                'currency' => strtoupper((string) ($payload['currency'] ?? 'EUR')),
+                'notes' => $payload['notes'] ?? null,
+                'request_key' => $payload['request_key'] ?? null,
+            ]);
+
+            foreach ($payload['items'] as $item) {
+                $sale->items()->create([
+                    'product_id' => $item['product_id'],
+                    'inventory_item_id' => $item['inventory_item_id'] ?? null,
+                    'quantity' => $item['quantity'],
+                    'unit_price_amount' => $item['unit_price_amount'],
+                    'line_total_amount' => ((float) $item['unit_price_amount']) * ((int) $item['quantity']),
+                ]);
+            }
+
+            return $sale->load('items');
+        });
+
+        return response()->json(['data' => $sale], 201);
+    }
+}
