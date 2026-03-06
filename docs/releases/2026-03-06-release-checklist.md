@@ -1,5 +1,11 @@
 # Release Checklist – 2026-03-06
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 ## Scope
 
 Durchführung der angeforderten Punkte:

@@ -1,5 +1,11 @@
 # Docker Compose v2 – Deployment & Betrieb
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 Diese Variante stellt TCventory mit folgenden Services bereit:
 
 - `web` (Nginx)

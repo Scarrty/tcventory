@@ -1,5 +1,11 @@
 # Upgrade-Plan: PHP 8.4 + LTS-Stack
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 ## Ziel
 
 Das Projekt wird von der aktuell in `composer.json` hinterlegten Plattform `php 8.2.0` auf **PHP 8.4** angehoben und gleichzeitig auf einen konsistenten **LTS/Stable-Stack** über alle zentralen Laufzeit- und Build-Abhängigkeiten gebracht.

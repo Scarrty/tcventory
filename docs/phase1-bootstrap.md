@@ -1,5 +1,11 @@
 # Phase 1 Bootstrap-Setup (Empfehlung)
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 Dieses Dokument konkretisiert die Entscheidungen für:
 1. **Auth-Stack:** Laravel Breeze + Sanctum
 2. **RBAC:** spatie/laravel-permission
