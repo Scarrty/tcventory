@@ -39,6 +39,18 @@ class SanctumTokenTest extends TestCase
         $this->assertDatabaseCount('personal_access_tokens', 1);
     }
 
+    public function test_token_endpoint_defaults_to_read_only_ability(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/v1/tokens', [
+            'token_name' => 'default-ability-token',
+        ])
+            ->assertOk()
+            ->assertJsonPath('abilities.0', 'inventory:read');
+    }
+
     public function test_token_endpoint_rejects_too_many_abilities(): void
     {
         $user = User::factory()->create();
@@ -50,6 +62,31 @@ class SanctumTokenTest extends TestCase
             'token_name' => 'feature-test-token',
             'abilities' => $abilities,
         ])->assertUnprocessable();
+    }
+
+    public function test_token_endpoint_rejects_unknown_abilities(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/v1/tokens', [
+            'token_name' => 'feature-test-token',
+            'abilities' => ['admin:all'],
+        ])->assertUnprocessable();
+    }
+
+    public function test_token_endpoint_normalizes_and_deduplicates_abilities(): void
+    {
+        $user = User::factory()->create();
+        Sanctum::actingAs($user);
+
+        $this->postJson('/api/v1/tokens', [
+            'token_name' => 'feature-test-token',
+            'abilities' => [' Inventory:Read ', 'inventory:read', 'catalog:read'],
+        ])
+            ->assertOk()
+            ->assertJsonPath('abilities.0', 'inventory:read')
+            ->assertJsonPath('abilities.1', 'catalog:read');
     }
 
     public function test_user_can_access_protected_me_endpoint_with_valid_bearer_token_and_role(): void

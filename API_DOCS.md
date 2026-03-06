@@ -42,6 +42,26 @@ Aktueller Minimalstatus:
 }
 ```
 
+
+### Tokens
+
+#### `POST /api/v1/tokens`
+
+**Auth:** `Bearer` Token über Sanctum (eingeloggt).
+
+**Request (JSON):**
+
+```json
+{
+  "token_name": "ci-integration",
+  "abilities": ["inventory:read", "catalog:read"],
+  "expires_in_minutes": 120
+}
+```
+
+- `abilities` ist optional; Standard ist `inventory:read`.
+- Erlaubte `abilities`: `inventory:read`, `inventory:write`, `catalog:read`, `catalog:write`, `reports:read`.
+
 ## 4. Geplante Endpunkte (laut Spezifikation)
 
 ### 4.1 Auth & Session
