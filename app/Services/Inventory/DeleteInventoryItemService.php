@@ -7,6 +7,7 @@ namespace App\Services\Inventory;
 use App\Models\InventoryItem;
 use App\Models\InventoryMovement;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class DeleteInventoryItemService
 {
@@ -15,6 +16,12 @@ class DeleteInventoryItemService
         DB::transaction(function () use ($inventoryItem): void {
             /** @var InventoryItem $lockedItem */
             $lockedItem = InventoryItem::query()->lockForUpdate()->findOrFail($inventoryItem->id);
+
+            if ($lockedItem->inventoryMovements()->exists()) {
+                throw ValidationException::withMessages([
+                    'inventory_item' => 'The inventory item cannot be deleted because movements already exist for it.',
+                ]);
+            }
 
             InventoryMovement::query()->create([
                 'inventory_item_id' => $lockedItem->id,

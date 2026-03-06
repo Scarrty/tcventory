@@ -90,4 +90,25 @@ class SetApiTest extends TestCase
 
         $this->assertSoftDeleted('sets', ['id' => $set->id]);
     }
+
+
+    public function test_destroy_returns_forbidden_for_unauthorized_role(): void
+    {
+        $viewer = User::factory()->create();
+        $viewer->assignRole('viewer');
+        Sanctum::actingAs($viewer);
+
+        $set = Set::factory()->create();
+
+        $this->deleteJson("/api/v1/sets/{$set->id}")->assertForbidden();
+        $this->assertDatabaseHas('sets', ['id' => $set->id, 'deleted_at' => null]);
+    }
+
+    public function test_destroy_returns_not_found_for_unknown_id(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.delete']);
+        Sanctum::actingAs($user);
+
+        $this->deleteJson('/api/v1/sets/999999')->assertNotFound();
+    }
 }
