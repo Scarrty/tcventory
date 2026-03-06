@@ -30,7 +30,7 @@ Kernziele:
 
 ### Datenhaltung und Infrastruktur
 
-- PostgreSQL (empfohlen), MySQL (unterstützt)
+- PostgreSQL
 - Redis (Cache/Queue/Locks)
 - Laravel Horizon (Queue Monitoring)
 - Meilisearch (optional)
