@@ -97,4 +97,25 @@ class ProductApiTest extends TestCase
 
         $this->assertSoftDeleted('products', ['id' => $product->id]);
     }
+
+
+    public function test_destroy_returns_forbidden_for_unauthorized_role(): void
+    {
+        $viewer = User::factory()->create();
+        $viewer->assignRole('viewer');
+        Sanctum::actingAs($viewer);
+
+        $product = Product::factory()->create();
+
+        $this->deleteJson("/api/v1/products/{$product->id}")->assertForbidden();
+        $this->assertDatabaseHas('products', ['id' => $product->id, 'deleted_at' => null]);
+    }
+
+    public function test_destroy_returns_not_found_for_unknown_id(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.delete']);
+        Sanctum::actingAs($user);
+
+        $this->deleteJson('/api/v1/products/999999')->assertNotFound();
+    }
 }

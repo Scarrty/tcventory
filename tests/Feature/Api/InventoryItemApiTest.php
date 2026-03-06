@@ -146,4 +146,49 @@ class InventoryItemApiTest extends TestCase
             'quantity_delta' => -4,
         ]);
     }
+
+
+    public function test_destroy_returns_forbidden_for_unauthorized_role(): void
+    {
+        [$inventoryItem] = $this->createInventoryFixture(quantity: 4);
+
+        $viewer = User::factory()->create();
+        $viewer->assignRole('viewer');
+        Sanctum::actingAs($viewer);
+
+        $this->deleteJson("/api/v1/inventory-items/{$inventoryItem->id}")->assertForbidden();
+
+        $this->assertDatabaseHas('inventory_items', ['id' => $inventoryItem->id, 'deleted_at' => null]);
+        $this->assertDatabaseMissing('inventory_movements', [
+            'inventory_item_id' => $inventoryItem->id,
+            'movement_type' => 'deletion',
+        ]);
+    }
+
+    public function test_destroy_returns_not_found_for_unknown_id(): void
+    {
+        $user = $this->createUserWithPermissions(['inventory.delete']);
+        Sanctum::actingAs($user);
+
+        $this->deleteJson('/api/v1/inventory-items/999999')->assertNotFound();
+    }
+
+    public function test_destroy_returns_unprocessable_when_inventory_item_has_existing_movements(): void
+    {
+        $user = $this->createUserWithPermissions(['inventory.delete']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem] = $this->createInventoryFixture(quantity: 4);
+        $this->createInventoryMovementForItem($inventoryItem);
+
+        $this->deleteJson("/api/v1/inventory-items/{$inventoryItem->id}")
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['inventory_item']);
+
+        $this->assertDatabaseHas('inventory_items', ['id' => $inventoryItem->id, 'deleted_at' => null]);
+        $this->assertDatabaseMissing('inventory_movements', [
+            'inventory_item_id' => $inventoryItem->id,
+            'movement_type' => 'deletion',
+        ]);
+    }
 }

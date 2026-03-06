@@ -93,4 +93,24 @@ class GameApiTest extends TestCase
 
         $this->assertSoftDeleted('games', ['id' => $game->id]);
     }
+
+    public function test_destroy_returns_forbidden_for_unauthorized_role(): void
+    {
+        $viewer = User::factory()->create();
+        $viewer->assignRole('viewer');
+        Sanctum::actingAs($viewer);
+
+        $game = Game::factory()->create();
+
+        $this->deleteJson("/api/v1/games/{$game->id}")->assertForbidden();
+        $this->assertDatabaseHas('games', ['id' => $game->id, 'deleted_at' => null]);
+    }
+
+    public function test_destroy_returns_not_found_for_unknown_id(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.delete']);
+        Sanctum::actingAs($user);
+
+        $this->deleteJson('/api/v1/games/999999')->assertNotFound();
+    }
 }

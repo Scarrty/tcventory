@@ -6,6 +6,7 @@ namespace Tests\Concerns;
 
 use App\Models\Game;
 use App\Models\InventoryItem;
+use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\Set;
 use App\Models\StorageLocation;
@@ -51,4 +52,18 @@ trait ApiTestData
 
         return [$inventoryItem, $sourceLocation, $targetLocation];
     }
+
+    protected function createInventoryMovementForItem(InventoryItem $inventoryItem, int $quantityDelta = -1, string $movementType = 'adjustment'): InventoryMovement
+    {
+        return InventoryMovement::query()->create([
+            'inventory_item_id' => $inventoryItem->id,
+            'movement_type' => $movementType,
+            'quantity_delta' => $quantityDelta,
+            'from_storage_location_id' => $inventoryItem->storage_location_id,
+            'to_storage_location_id' => null,
+            'reason' => 'Test movement',
+            'occurred_at' => now(),
+        ]);
+    }
+
 }

@@ -67,6 +67,26 @@ class InventoryServicesTest extends TestCase
         ]);
     }
 
+
+    public function test_delete_inventory_item_service_rejects_when_movements_exist(): void
+    {
+        $item = $this->createInventoryItem(quantity: 3);
+
+        InventoryMovement::query()->create([
+            'inventory_item_id' => $item->id,
+            'movement_type' => 'adjustment',
+            'quantity_delta' => 1,
+            'from_storage_location_id' => $item->storage_location_id,
+            'to_storage_location_id' => null,
+            'reason' => 'Existing movement',
+            'occurred_at' => now(),
+        ]);
+
+        $this->expectException(ValidationException::class);
+
+        app(DeleteInventoryItemService::class)->execute($item);
+    }
+
     public function test_delete_product_service_rejects_when_inventory_exists(): void
     {
         $item = $this->createInventoryItem(quantity: 1);
