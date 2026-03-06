@@ -97,6 +97,7 @@ Weitere Details inkl. Rollback-Strategie siehe:
 - `database/migrations/2026_01_01_000002_create_inventory_tables.php`
 - `database/migrations/2026_01_01_000003_create_finance_tables.php`
 - `database/migrations/2026_01_01_000004_create_audit_and_ledger_tables.php`
+- `database/migrations/2026_01_01_000005_create_auth_tables.php`
 - `database/seeders/RolesAndPermissionsSeeder.php`
 - `app/Models/User.php`
 - `routes/web.php`
