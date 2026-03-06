@@ -61,3 +61,9 @@ TCventory entwickelt sich von einer dokumentierten Basis hin zu einer produktion
 - Konsistente Transaktionen in kritischen Prozessen
 - Testabdeckung für Domainlogik und API-Flows
 - Coding-Standards über Pint, statische Analyse via PHPStan
+
+## Technische Upgrade-Initiative – PHP 8.4 & LTS-Stack (geplant)
+
+- Geplantes Upgrade der Runtime-Anforderung auf PHP 8.4
+- LTS-Harmonisierung des gesamten Stacks (Backend, Frontend-Build, Infrastruktur)
+- Detaillierter Ablauf inkl. Risiko- und Rollback-Plan in `docs/php84-lts-upgrade-plan.md`
