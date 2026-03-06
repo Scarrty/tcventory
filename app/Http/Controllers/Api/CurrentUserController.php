@@ -12,11 +12,13 @@ class CurrentUserController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
+        $user = $request->user();
+
         return response()->json([
-            'id' => $request->user()->id,
-            'name' => $request->user()->name,
-            'email' => $request->user()->email,
-            'roles' => $request->user()->getRoleNames()->values(),
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'roles' => $user->getRoleNames()->values(),
         ]);
     }
 }

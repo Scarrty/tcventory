@@ -60,7 +60,7 @@ class ProductResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()?->can('viewAny', Product::class) ?? false;
+        return static::canAccess();
     }
 
     public static function canAccess(): bool
