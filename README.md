@@ -15,7 +15,25 @@ Dieses Repository enthält ein vollständiges Laravel-12-Projektgerüst mit migr
 - **Phase 3:** teilweise umgesetzt (Purchases, Sales, Valuations, Finance Summary)
 - **Phase 4/5:** vorbereitet bzw. geplant (Audit-Hash-Chain, erweiterte Reports, Integrationen)
 
-Siehe auch: `ROADMAP.md`, `PROGRESS.md`, `docs/current-state-roadmap-review.md`.
+Siehe auch: `docs/README.md` (Dokumentationslandkarte), `ROADMAP.md`, `PROGRESS.md`.
+
+## Dokumentation (Lesepfade)
+
+Für klare Zuständigkeiten zwischen den Doku-Dateien siehe die zentrale Dokumentationslandkarte:
+
+- `docs/README.md`
+
+Empfohlener Einstieg:
+
+1. `README.md` (Quickstart)
+2. `PROJECT_OVERVIEW.md` (Architektur & Scope)
+3. `API_DOCS.md` (API-Kontrakte)
+4. `ROADMAP.md` + `PROGRESS.md` (Plan vs. Ist)
+
+Spezifikationen nach Zielgruppe:
+
+- `spec.md`: Setup-/Reproduzierbarkeitsleitfaden für Codex-Instanzen
+- `docs/technische-spezifikation.md`: technische Systemspezifikation für Engineering
 
 ## Kernfunktionen (implementiert)
 
@@ -91,3 +109,5 @@ Empfehlung für Produktion:
 - Release-Artefakte und Rollback-Hinweise nutzen
 
 Details: `docs/deployment/docker-compose-v2.md`.
+
+Release-Dokumentationsprozess: `docs/releases/README.md`.

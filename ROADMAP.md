@@ -6,6 +6,13 @@
 - Stand: 2026-03-06
 - Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
 
+## Dokumentgrenzen
+
+- **Dieses Dokument** beschreibt die _geplante_ Entwicklung (Vorwärtsblick, Phasen, Ziele, offene Lücken).
+- Produktvision und Markt-/Nutzerperspektive stehen in `VISION.md`.
+- Technische Architektur und Systemzuschnitt stehen in `PROJECT_OVERVIEW.md`.
+- Der aktuelle Umsetzungsstand steht in `PROGRESS.md`.
+
 ## Zielbild
 
 TCventory entwickelt sich von einer dokumentierten Basis zu einer produktionsnahen Inventar- und Finanzplattform für TCG-Bestände mit nachvollziehbaren Inventarbewegungen, belastbaren Finanzkennzahlen und auditfähigen Prozessen.

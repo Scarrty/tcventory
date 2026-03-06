@@ -9,15 +9,19 @@
 ## Scope
 Umsetzungs- und Qualitäts-Tracking für den aktuellen Lieferstand mit Fokus auf **ROADMAP Phase 2/3**.
 
+**Last authoritative update:** 2026-03-06
+
+> Dieses Dokument ist die maßgebliche Live-Quelle für den aktuellen Status. Historische Bewertungen sind als Snapshots unter `docs/reviews/` abgelegt.
+
 ## Gesamtstand
 
 | Bereich | Status | Fortschritt | Referenz |
 |---|---|---:|---|
 | Phase 0 – Foundations | Abgeschlossen | 100% | `ROADMAP.md` |
 | Phase 1 – Core Platform Setup | Abgeschlossen | 100% | `docs/phase1-review.md` |
-| Phase 2 – Inventory & Catalog MVP | In finaler Konsolidierung | 90% | `docs/current-state-roadmap-review.md` |
-| Phase 3 – Finance & Valuation | Teilweise umgesetzt | 55% | `docs/current-state-roadmap-review.md` |
-| Phase 4 – Audit/Operations | Vorbereitung | 20% | `docs/current-state-roadmap-review.md` |
+| Phase 2 – Inventory & Catalog MVP | In finaler Konsolidierung | 90% | `docs/reviews/2026-03-06-roadmap-review.md` |
+| Phase 3 – Finance & Valuation | Teilweise umgesetzt | 55% | `docs/reviews/2026-03-06-roadmap-review.md` |
+| Phase 4 – Audit/Operations | Vorbereitung | 20% | `docs/reviews/2026-03-06-roadmap-review.md` |
 | Phase 5 – Skalierung/Integrationen | Geplant | 5% | `ROADMAP.md` |
 
 ## Arbeitspakete (aktiver Fokus)

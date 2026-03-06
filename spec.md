@@ -15,6 +15,15 @@ Dieses Dokument beschreibt, wie eine weitere Codex-Instanz TCventory reproduzier
 
 Zusätzlich enthält es einen kompakten Ist-Stand der Implementierung, damit Setup und Produktrealität konsistent bleiben.
 
+## 1a) Audience
+- Primär: Codex-/Automations-Instanzen und Maintainer für reproduzierbare Setup- und QA-Abläufe.
+- Sekundär: Entwickler:innen, die schnell einen lauffähigen Stand herstellen wollen.
+
+## 1b) Non-goals
+- Keine vollständige Domänen-/Architekturspezifikation.
+- Keine langfristige Produkt- oder Roadmap-Strategie.
+- Kein Ersatz für `docs/technische-spezifikation.md` (Engineering-Spezifikation).
+
 ---
 
 ## 2) Projektziel (Kurzfassung)
