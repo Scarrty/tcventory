@@ -38,4 +38,14 @@ class GamePolicy
     {
         return $user->hasPermissionTo('catalog.delete');
     }
+
+    public function restore(User $user, Game $game): bool
+    {
+        return $user->hasPermissionTo('catalog.update');
+    }
+
+    public function forceDelete(User $user, Game $game): bool
+    {
+        return $user->hasPermissionTo('catalog.delete');
+    }
 }
