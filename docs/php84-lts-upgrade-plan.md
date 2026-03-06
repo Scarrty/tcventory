@@ -6,6 +6,14 @@ Das Projekt wird von der aktuell in `composer.json` hinterlegten Plattform `php 
 
 ## Scope
 
+## Umsetzungsstand (aktuell)
+
+- ✅ `composer.json` auf `php: ^8.4` und `config.platform.php: 8.4.0` umgestellt.
+- ✅ `composer.lock` mit PHP-8.4-Zielstand neu generiert und kompatible Paketupdates übernommen.
+- ✅ Node-LTS-Pinning über `.nvmrc` (`22`) und `package.json#engines` ergänzt.
+- ✅ Baseline-Qualitätsgates lokal gegen den neuen Stack ausgeführt (`composer test`, `php artisan test`, `phpstan`, `pint --test`, `npm run build`).
+
+
 - Backend-Runtime: PHP, Laravel, zentrale Laravel-Pakete
 - Admin/UI-Stack: Filament
 - Frontend-Build-Stack: Node.js LTS, Vite, Tailwind, PostCSS

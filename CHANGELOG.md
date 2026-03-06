@@ -27,6 +27,9 @@ Das Format orientiert sich an *Keep a Changelog* und verwendet semantische Versi
 
 ### Changed
 
+- PHP-Runtime auf `^8.4` angehoben und Composer-Platform-Pin auf `8.4.0` aktualisiert.
+- Node-LTS-Version für den Build-Stack über `.nvmrc` auf `22` festgelegt und in `package.json` als Engine dokumentiert.
+- Composer-Lockfile auf den neuen PHP-Target-Stand neu aufgelöst (inkl. kompatibler Paket-Updates).
 - `README.md` von einer minimalen Kurzbeschreibung zu einer vollständigen Projekt-Einstiegsdokumentation erweitert.
 - Phase-1-Statusdokumente (`ROADMAP.md`, `PROGRESS.md`) mit einem expliziten Architektur-Review synchronisiert.
 
