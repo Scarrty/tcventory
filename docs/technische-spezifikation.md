@@ -6,6 +6,17 @@
 - Stand: 2026-03-06
 - Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
 
+## 0. Audience und Abgrenzung
+
+**Audience**
+- Engineering-Team (Backend/Frontend/DevOps)
+- Reviewer für Architektur- und Betriebsentscheidungen
+
+**Non-goals**
+- Keine Schritt-für-Schritt-Bootstrap-Anleitung für Codex-Instanzen (siehe `spec.md`).
+- Kein laufendes Fortschrittstracking (siehe `PROGRESS.md`).
+- Keine Produktvision-/Marktargumentation (siehe `VISION.md`).
+
 ## 1. Zielbild und Scope
 
 TCventory ist eine Laravel-12-Anwendung zur Inventar- und Finanzverwaltung von TCG-Produkten mit Backoffice-Fokus.

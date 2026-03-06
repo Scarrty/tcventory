@@ -6,6 +6,13 @@
 - Stand: 2026-03-06
 - Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
 
+## 0. Dokumentgrenzen
+
+- **Dieses Dokument** beschreibt Architektur, technische Module und nicht-funktionale Anforderungen.
+- Produktvision und Zielgruppen stehen in `VISION.md`.
+- Roadmap/Meilensteine stehen in `ROADMAP.md`.
+- Live-Fortschritt steht in `PROGRESS.md`.
+
 ## 1. Ziel und Scope
 
 **TCventory** ist eine Webanwendung zur Verwaltung von TCG-Karten und Sealed-Produkten.

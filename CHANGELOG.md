@@ -14,7 +14,8 @@ Das Format orientiert sich an *Keep a Changelog* und verwendet semantische Versi
 
 ### Added
 
-- _Keine Änderungen erfasst._
+- Dokumentationsstruktur konsolidiert: zentrale Landkarte (`docs/README.md`), Review-Snapshots unter `docs/reviews/`, Release-Prozessdoku (`docs/releases/README.md`).
+- Klare Dokumentgrenzen zwischen `VISION.md`, `PROJECT_OVERVIEW.md`, `ROADMAP.md`, `PROGRESS.md`, `spec.md` und `docs/technische-spezifikation.md` ergänzt.
 
 ## [0.1.0] - 2026-03-06
 

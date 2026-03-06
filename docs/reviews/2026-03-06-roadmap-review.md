@@ -1,6 +1,11 @@
 # Current State Review – Roadmap, Fortschritt & Quality Control
 
 
+## Historischer Snapshot
+
+> Dieses Dokument ist eine zeitgebundene Review-Aufnahme und **nicht** die Live-Statusquelle.
+> Maßgeblicher aktueller Status: `PROGRESS.md`.
+
 ## Dokumentationsstatus
 
 - Stand: 2026-03-06
