@@ -38,4 +38,14 @@ class ProductPolicy
     {
         return $user->hasPermissionTo('catalog.delete');
     }
+
+    public function restore(User $user, Product $product): bool
+    {
+        return $user->hasPermissionTo('catalog.update');
+    }
+
+    public function forceDelete(User $user, Product $product): bool
+    {
+        return $user->hasPermissionTo('catalog.delete');
+    }
 }

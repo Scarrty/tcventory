@@ -38,4 +38,14 @@ class SetPolicy
     {
         return $user->hasPermissionTo('catalog.delete');
     }
+
+    public function restore(User $user, Set $set): bool
+    {
+        return $user->hasPermissionTo('catalog.update');
+    }
+
+    public function forceDelete(User $user, Set $set): bool
+    {
+        return $user->hasPermissionTo('catalog.delete');
+    }
 }

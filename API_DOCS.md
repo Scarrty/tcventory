@@ -7,6 +7,7 @@ TCventory stellt eine versionierte API unter **`/api/v1`** bereit. Die API ist p
 Aktueller Minimalstatus:
 
 - `GET /api/v1/health` liefert einen einfachen API-Status.
+- REST-Endpunkte für `games`, `sets`, `products` und `inventory-items` mit `index/store/show/update` sind vorhanden.
 
 ## 2. Basis-Konventionen
 
@@ -26,6 +27,8 @@ Aktueller Minimalstatus:
 - Idempotency-Key für kritische POST-Endpunkte (insb. `sales`, `purchases`)
 
 ## 3. Aktuell implementierte Endpunkte
+
+Alle Ressourcen-Endpunkte liefern eine konsistente Antwort mit `data` und bei Listen zusätzlich `meta` (Pagination).
 
 ### Health
 
@@ -61,6 +64,28 @@ Aktueller Minimalstatus:
 
 - `abilities` ist optional; Standard ist `inventory:read`.
 - Erlaubte `abilities`: `inventory:read`, `inventory:write`, `catalog:read`, `catalog:write`, `reports:read`.
+
+### Katalog (implementiert)
+
+- `GET /api/v1/games`
+- `POST /api/v1/games`
+- `GET /api/v1/games/{id}`
+- `PATCH /api/v1/games/{id}`
+- `GET /api/v1/sets`
+- `POST /api/v1/sets`
+- `GET /api/v1/sets/{id}`
+- `PATCH /api/v1/sets/{id}`
+- `GET /api/v1/products`
+- `POST /api/v1/products`
+- `GET /api/v1/products/{id}`
+- `PATCH /api/v1/products/{id}`
+
+### Inventar (implementiert)
+
+- `GET /api/v1/inventory-items`
+- `POST /api/v1/inventory-items`
+- `GET /api/v1/inventory-items/{id}`
+- `PATCH /api/v1/inventory-items/{id}`
 
 ## 4. Geplante Endpunkte (laut Spezifikation)
 
