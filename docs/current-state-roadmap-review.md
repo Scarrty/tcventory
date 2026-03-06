@@ -9,7 +9,7 @@ Diese Review bewertet den aktuellen Stand des Repositories gegen:
 - den aktuell implementierten API-/Service-/Test-Stand
 - den aktuellen QA-Status aus lokalen Qualitätschecks
 
-Stand der Prüfung: **2026-03-06**.
+Stand der Prüfung: **2026-03-06** (inkl. erneuter lokaler QA-Ausführung).
 
 ---
 
@@ -19,7 +19,7 @@ Stand der Prüfung: **2026-03-06**.
 - **Phase 2 ist technisch deutlich weiter als das formale Fortschrittstracking**: CRUD + Transfer/Adjust sind implementiert, inklusive Delete-Pfaden.
 - **Phase 3 ist teilweise bereits vorgezogen** (Purchases/Sales/Valuations + Finance Summary + Request-Key-Idempotenz für Purchases/Sales), wird aber im Fortschritt nicht explizit geführt.
 - **Phase 4/5 sind nur vorbereitet, nicht voll umgesetzt**: Audit-Tabellen existieren, aber keine durchgängige append-only Hash-Chain-Implementierung im Anwendungscode.
-- **QC-Risiko aktuell hoch**: wichtige Quality Gates laufen lokal nicht grün (Pint-Style-Issues, PHPStan-Memory-Limit, Test-Fails wegen fehlender Runtime-Artefakte wie `.env`/Vite-Manifest).
+- **QC-Risiko aktuell hoch**: wichtige Quality Gates laufen lokal nicht grün (Pint-Style-Issues, PHPStan-Memory-Limit, Test-Fails inkl. fehlender Runtime-Artefakte wie `.env` und Vite-Manifest).
 
 ---
 
@@ -72,19 +72,19 @@ Erfüllt durch dokumentierte Basis, Versionierung und Health-Endpunkt.
 
 ### Ergebnis lokaler Gates
 
-- `vendor/bin/pint --test` → **FAIL** (Style-Abweichungen in mehreren Testdateien)
-- `vendor/bin/phpstan analyse` → **FAIL/WARN** (Abbruch durch PHP memory limit 128M)
-- `php artisan test` → **FAIL/WARN** (u. a. fehlende `.env` und fehlendes `public/build/manifest.json` für Vite in Feature-Tests)
+- `vendor/bin/pint --test` → **FAIL** (5 Style-Abweichungen, ausschließlich `class_attributes_separation` in Testdateien)
+- `vendor/bin/phpstan analyse` → **FAIL/WARN** (Abbruch durch konfiguriertes PHP-Memory-Limit 128M im Parallel-Worker)
+- `php artisan test` → **FAIL/WARN** (Suite startet, endet jedoch mit 7 Fails + 69 Warnings; zentrale Ursachen: fehlende `.env` und fehlendes `public/build/manifest.json` in View-basierten Feature-Tests)
 
 ### Bewertung
 
-Die Projektfunktionalität ist in zentralen Domänen sichtbar fortgeschritten, aber die **Delivery-Qualität ist derzeit nicht release-ready**, weil die Standard-Quality-Gates nicht stabil grün laufen.
+Die Projektfunktionalität ist in zentralen Domänen sichtbar fortgeschritten, aber die **Delivery-Qualität ist derzeit nicht release-ready**, weil die Standard-Quality-Gates nicht stabil grün laufen. Positiv: Die Gates sind ausführbar und liefern reproduzierbare, priorisierbare Fehlerbilder.
 
 ---
 
 ## Priorisierte Actionable TODOs
 
-## P0 – Unblock Quality Gates (sofort)
+### P0 – Unblock Quality Gates (sofort)
 
 1. **Test-/CI-Umgebung deterministisch machen**
    - `.env.testing` verbindlich bereitstellen und im Testbootstrap erzwingen.
@@ -99,7 +99,7 @@ Die Projektfunktionalität ist in zentralen Domänen sichtbar fortgeschritten, a
    - Memory-Limit im QA-Script/CI erhöhen (z. B. `--memory-limit=512M` oder höher).
    - Ziel: vollständiger statischer Analysebericht statt Frühabbruch.
 
-## P1 – Plan/Ist-Synchronisierung
+### P1 – Plan/Ist-Synchronisierung
 
 4. **`PROGRESS.md` an Realstand anpassen**
    - Phase 2 realistisch nachziehen (CRUD inkl. Delete + Inventory-Flows bereits umgesetzt).
@@ -109,7 +109,7 @@ Die Projektfunktionalität ist in zentralen Domänen sichtbar fortgeschritten, a
    - Klar festhalten, ob „Phase-3 vorgezogen während Phase-2-Abschluss“ strategisch gewollt ist.
    - Abnahmekriterien (DoD) je Phase mit messbaren Kriterien ergänzen.
 
-## P1 – Audit- und Revisionssicherheit (Roadmap-Kernversprechen)
+### P1 – Audit- und Revisionssicherheit (Roadmap-Kernversprechen)
 
 6. **Audit-Chain produktiv machen**
    - Event-Erfassung zentralisieren (Domain Events/Observer/Service-Hooks).
@@ -119,7 +119,7 @@ Die Projektfunktionalität ist in zentralen Domänen sichtbar fortgeschritten, a
 7. **Ledger/Audit-Abdeckung für alle kritischen Flows prüfen**
    - Catalog-Delete, Transfer, Adjust, Purchase/Sale/Valuation systematisch auf Audit-Ereignisse mappen.
 
-## P2 – API-Konsistenz & Betriebsreife
+### P2 – API-Konsistenz & Betriebsreife
 
 8. **Response-/Fehler-Contracts vereinheitlichen**
    - Einheitliches Fehlerformat über alle Endpunkte (inkl. Validation/Policy/Domain-Fehler) sicherstellen.
