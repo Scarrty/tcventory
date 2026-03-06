@@ -8,7 +8,14 @@ Das Format orientiert sich an *Keep a Changelog* und verwendet semantische Versi
 
 ### Added
 
+- _Keine Änderungen erfasst._
+
+## [0.1.0] - 2026-03-06
+
+### Added
+
 - Release-Checklist für den 2026-03-06 Lauf ergänzt (`docs/releases/2026-03-06-release-checklist.md`) inkl. Test-, Migrations-, Build- und Deployment-Status.
+- Release-Notes für `v0.1.0` ergänzt (`docs/releases/2026-03-06-v0.1.0.md`).
 - Neue, konsolidierte Projektdokumentation auf Root-Ebene:
   - `README.md`
   - `PROJECT_OVERVIEW.md`
