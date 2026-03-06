@@ -82,3 +82,7 @@ Für die Testausführung sind in CI Services für PostgreSQL (Datenbank) und Red
   - `Database\\Factories\\` → `database/factories/`
   - `Database\\Seeders\\` → `database/seeders/`
 - Für das User-Modell mit Rollen/Rechten ist `spatie/laravel-permission` als Composer-Abhängigkeit enthalten.
+
+## Deployment (Docker Compose v2)
+
+Siehe `docs/deployment/docker-compose-v2.md` für die Production-ready-light Variante.
