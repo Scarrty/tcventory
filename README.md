@@ -8,73 +8,70 @@
 
 Dieses Repository enthält ein vollständiges Laravel-12-Projektgerüst mit migrierten, projektspezifischen TCventory-Dateien.
 
-## Enthaltene Struktur (Auszug)
+## Aktueller Stand
 
-- `artisan`
-- `composer.json`
-- `app/Providers/`
-- `bootstrap/`
-- `config/`
-- `database/migrations/`
-- `routes/web.php`
-- `routes/api.php`
+- **Phase 0/1:** abgeschlossen (Plattform, Auth, RBAC, Migrationen, Filament-Basis)
+- **Phase 2:** weitgehend umgesetzt (API-CRUD für Katalog/Inventar inkl. Delete, Transfer, Stock-Adjust)
+- **Phase 3:** teilweise umgesetzt (Purchases, Sales, Valuations, Finance Summary)
+- **Phase 4/5:** vorbereitet bzw. geplant (Audit-Hash-Chain, erweiterte Reports, Integrationen)
+
+Siehe auch: `ROADMAP.md`, `PROGRESS.md`, `docs/current-state-roadmap-review.md`.
+
+## Kernfunktionen (implementiert)
+
+- API v1 unter `/api/v1`
+- Health-Endpoint: `GET /api/v1/health`
+- Katalog-CRUD: `games`, `sets`, `products`
+- Inventar-CRUD: `inventory-items`
+- Inventar-Aktionen: `transfer`, `adjust-stock`
+- Finance-Module: `purchases`, `sales`, `valuations`
+- Finance-Report: `GET /api/v1/reports/finance-summary`
+- Token-basierte API-Authentifizierung via Sanctum (`POST /api/v1/tokens`, `GET /api/v1/me`)
 
 ## Voraussetzungen
 
 - PHP `^8.4`
 - Composer `^2`
-- Node.js `22 LTS` + npm (optional, für Frontend-Build; Version ist in `.nvmrc` gepinnt)
+- Node.js `22 LTS` + npm
+- Datenbank: PostgreSQL (empfohlen) oder SQLite für lokale Minimal-Setups
+- Optional: Redis
 
-## Reproduzierbares Setup
+## Lokales Setup
 
 ```bash
 composer install
+npm install
 cp .env.example .env
 php artisan key:generate
 ```
 
-### Datenbank vorbereiten (SQLite-Beispiel)
+### Datenbank (SQLite-Beispiel)
 
 ```bash
 touch database/database.sqlite
 php artisan migrate
 ```
 
-### Optional: Rollen/Rechte seeden
+### Optionales Seeding
 
 ```bash
 php artisan db:seed --class=Database\\Seeders\\RolesAndPermissionsSeeder
 ```
 
-### Entwicklungsserver starten
+### Starten
 
 ```bash
 php artisan serve
+npm run dev
 ```
 
-### Tests ausführen
+## Tests & Qualität
 
 ```bash
 php artisan test
+vendor/bin/pint --test
+vendor/bin/phpstan analyse --memory-limit=1G
 ```
-
-## CI/CD
-
-Der Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) läuft bei Pull Requests und bei Pushes auf `main`.
-
-Folgende Quality Gates sind definiert:
-
-- `vendor/bin/pint --test`
-- `vendor/bin/phpstan analyse`
-- `php artisan test`
-
-Für die Testausführung sind in CI Services für PostgreSQL (Datenbank) und Redis konfiguriert.
-
-Zusätzlich läuft bei jedem veröffentlichten GitHub Release der CD-Workflow [`.github/workflows/release.yml`](.github/workflows/release.yml):
-
-- Build + Push von `app` und `web` Docker-Images in GHCR
-- Tagging mit `<release-tag>` und `latest`
-- Erzeugung einer release-spezifischen `docker-compose.release.yml` als Release-Asset
 
 ## Docker & Deployment
 
@@ -89,30 +86,8 @@ IMAGE_TAG=latest docker compose --env-file .env.docker up -d
 
 Empfehlung für Produktion:
 
-- Nutze die `docker-compose.release.yml` aus dem jeweiligen Release.
-- Verwende einen fixen Release-Tag (`IMAGE_TAG=vX.Y.Z`) statt dauerhaft `latest`.
-- Führe nach jedem Deploy Migrationen aus.
+- release-spezifischen Tag nutzen (`IMAGE_TAG=vX.Y.Z`)
+- nach Deploy Migrationen ausführen
+- Release-Artefakte und Rollback-Hinweise nutzen
 
-Weitere Details inkl. Rollback-Strategie siehe:
-
-- [`docs/deployment/docker-compose-v2.md`](docs/deployment/docker-compose-v2.md)
-
-## Migrierte projektspezifische Dateien
-
-- `database/migrations/2026_01_01_000001_create_catalog_tables.php`
-- `database/migrations/2026_01_01_000002_create_inventory_tables.php`
-- `database/migrations/2026_01_01_000003_create_finance_tables.php`
-- `database/migrations/2026_01_01_000004_create_audit_and_ledger_tables.php`
-- `database/migrations/2026_01_01_000005_create_auth_tables.php`
-- `database/seeders/RolesAndPermissionsSeeder.php`
-- `app/Models/User.php`
-- `routes/web.php`
-- `routes/api.php`
-
-## Hinweise zu Autoload/Namespaces
-
-- PSR-4 bleibt auf Laravel-Standard:
-  - `App\\` → `app/`
-  - `Database\\Factories\\` → `database/factories/`
-  - `Database\\Seeders\\` → `database/seeders/`
-- Für das User-Modell mit Rollen/Rechten ist `spatie/laravel-permission` als Composer-Abhängigkeit enthalten.
+Details: `docs/deployment/docker-compose-v2.md`.

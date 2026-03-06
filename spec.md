@@ -7,86 +7,72 @@
 - Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
 
 ## 1) Zweck dieses Dokuments
-Dieses Dokument beschreibt, wie eine **andere Codex-Instanz** das Projekt TCventory reproduzierbar
+Dieses Dokument beschreibt, wie eine weitere Codex-Instanz TCventory reproduzierbar
 
 1. lokal aufsetzt,
-2. für Tests vorbereitet,
-3. und für Deployment baut.
+2. testet,
+3. und für Deployment vorbereitet.
 
-Ziel ist ein standardisierter, automationsfreundlicher Ablauf ohne implizites Wissen.
+Zusätzlich enthält es einen kompakten Ist-Stand der Implementierung, damit Setup und Produktrealität konsistent bleiben.
 
 ---
 
 ## 2) Projektziel (Kurzfassung)
-TCventory ist eine Web-App zur Inventarverwaltung von TCG-Karten und Sealed-Produkten mit Fokus auf:
+TCventory ist eine Web-App zur Verwaltung von TCG-Inventar und begleitenden Finanzdaten mit Fokus auf:
 
-- Inventarisierung und Katalogisierung,
-- wirtschaftliches Tracking (Einkauf, aktueller Wert, Verkauf inkl. Gebühren/Versand),
-- Zustands- und Grading-Management,
-- audit-sichere Historie von Bestandsänderungen.
+- Katalogisierung (Game/Set/Product),
+- Bestandsführung (Inventory Items, Lagerorte, Zustandsdaten),
+- Finanzflüsse (Einkauf, Verkauf, Bewertung),
+- nachvollziehbare Bestandsänderungen (Audit/Ledger als Zielbild).
 
 ---
 
 ## 3) Zielplattform & Architektur
 
 ### Plattform
-- Web-App (Desktop + responsive Mobile)
+- Web-App (Backoffice-first, responsive nutzbar)
 
-### Geplanter Stack
+### Stack
 
 **Backend**
 - PHP 8.4+
 - Laravel 12
-- Composer
-- Eloquent ORM
+- Sanctum + Policies/RBAC
 
-**Frontend**
-- Filament Admin Framework
+**Frontend/Admin**
+- Filament
 - Livewire 3
 - Alpine.js
 - Tailwind CSS
-- Blade Templates
 
-**Datenbanken**
+**Daten & Infrastruktur**
 - PostgreSQL (empfohlen)
-
-**Infra / Async / Search**
-- Redis
-- Laravel Horizon
+- Redis (optional, empfohlen für Queue/Cache)
+- Horizon (optional, Betriebsausbau)
 - Meilisearch (optional)
 
-**Build / QA**
-- Node.js + npm
-- Vite
-- Pest + PHPUnit
-- PHPStan
+**Build/QA**
+- Node.js + npm + Vite
+- PHPUnit/Pest via `php artisan test`
 - Laravel Pint
-- Rector
-
-**Monitoring**
-- Sentry
+- PHPStan
 
 ---
 
-## 4) Voraussetzungen für eine frische Codex-Instanz
+## 4) Implementierungsstatus (Stand: 2026-03)
 
-Die Instanz sollte folgende Tools verfügbar haben:
+### Bereits umgesetzt
+- `/api/v1/health`
+- API-CRUD für `games`, `sets`, `products`, `inventory-items` (inkl. Delete)
+- Inventaraktionen: `transfer`, `adjust-stock`
+- Finance-Endpunkte: `purchases`, `sales`, `valuations` (index/store)
+- Aggregierter Report: `GET /api/v1/reports/finance-summary`
+- API-Tokens: `POST /api/v1/tokens`, `GET /api/v1/me`
 
-- `git`
-- `php` (>= 8.4)
-- `composer`
-- `node` + `npm`
-- `psql` Client
-- optional: `redis-cli`, `meilisearch`
-
-### Quick-Check
-
-```bash
-php -v
-composer --version
-node -v
-npm -v
-```
+### Teilweise umgesetzt / offen
+- Audit-Hash-Chain als systemweit erzwungenes append-only Verhalten
+- Tiefere Finance-/P&L-Reports
+- Weitergehende Integrationen und Search-Ausbau
 
 ---
 
@@ -94,75 +80,44 @@ npm -v
 
 > Alle Befehle im Repository-Root ausführen.
 
-### 5.1 Repository klonen
-
-```bash
-git clone <REPO_URL> tcventory
-cd tcventory
-```
-
-### 5.2 PHP- und Node-Abhängigkeiten installieren
+### 5.1 Abhängigkeiten installieren
 
 ```bash
 composer install
 npm install
 ```
 
-### 5.3 Umgebungsdatei anlegen und App-Key erzeugen
+### 5.2 Umgebung initialisieren
 
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-### 5.4 `.env` konfigurieren (mindestens)
-
-Folgende Variablen müssen konsistent gesetzt werden:
-
-- `APP_NAME=TCventory`
-- `APP_ENV=local` (für lokale Instanzen)
-- `APP_DEBUG=true` (nur lokal)
-- `APP_URL=http://localhost:8000`
-- `DB_CONNECTION=pgsql`
-- `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
-- `CACHE_STORE=redis` (oder Datei-Cache für Minimal-Setup)
-- `QUEUE_CONNECTION=redis`
-- `SESSION_DRIVER=database` oder `redis`
-- optional: Meilisearch- und Sentry-Variablen
-
-### 5.5 Datenbank vorbereiten
+### 5.3 Datenbank vorbereiten
 
 ```bash
 php artisan migrate
 ```
 
-Wenn Seed-Daten vorhanden sind:
+Optional:
 
 ```bash
 php artisan db:seed
 ```
 
-### 5.6 Lokale Laufzeit starten
-
-In separaten Prozessen:
+### 5.4 Lokale Laufzeit starten
 
 ```bash
 php artisan serve --host=0.0.0.0 --port=8000
 npm run dev
 ```
 
-Optional (Queue/Jobs):
-
-```bash
-php artisan queue:work
-php artisan horizon
-```
-
 ---
 
 ## 6) Test-Setup für Codex-Automation
 
-Vor jedem Testlauf:
+Vor einem Testlauf (empfohlen):
 
 ```bash
 php artisan config:clear
@@ -175,14 +130,14 @@ php artisan cache:clear
 php artisan test
 ```
 
-### Optionale Qualitätsprüfungen
+### Qualitätsprüfungen
 
 ```bash
 vendor/bin/pint --test
-vendor/bin/phpstan analyse
+vendor/bin/phpstan analyse --memory-limit=1G
 ```
 
-### Empfohlene Reihenfolge in CI
+### Empfohlene CI-Reihenfolge
 
 1. `composer install --no-interaction --prefer-dist`
 2. `npm ci`
@@ -190,13 +145,11 @@ vendor/bin/phpstan analyse
 4. `php artisan migrate --force`
 5. `php artisan test`
 6. `vendor/bin/pint --test`
-7. `vendor/bin/phpstan analyse`
+7. `vendor/bin/phpstan analyse --memory-limit=1G`
 
 ---
 
 ## 7) Deployment-Spezifikation (generisch)
-
-Diese Schritte sind Host-unabhängig (VM, Container, PaaS).
 
 ### 7.1 Build-Phase
 
@@ -206,17 +159,15 @@ npm ci
 npm run build
 ```
 
-### 7.2 Server-Konfiguration
+### 7.2 Runtime-Konfiguration
 
 - `APP_ENV=production`
 - `APP_DEBUG=false`
 - `APP_KEY` gesetzt
-- Produktions-DB + Redis erreichbar
-- Schreibrechte auf:
-  - `storage/`
-  - `bootstrap/cache/`
+- DB/Redis erreichbar
+- Schreibrechte auf `storage/` und `bootstrap/cache/`
 
-### 7.3 Laravel-Optimierung & Migration
+### 7.3 Optimierung & Migration
 
 ```bash
 php artisan migrate --force
@@ -225,39 +176,20 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-### 7.4 Prozessmanagement
+### 7.4 Minimaler Produktions-Check
 
-Empfohlen:
-
-- Webserver: Nginx + PHP-FPM
-- Queue-Worker via Supervisor/Systemd
-- Optional: Horizon als eigener Prozess
-
-### 7.5 Deployment-Checkliste
-
-- Health-Endpoint liefert 200 (`/api/v1/health`)
-- DB-Verbindung erfolgreich
-- Queue verarbeitet Jobs
-- Logs ohne kritische Fehler
-- Frontend-Assets aus `npm run build` korrekt ausgeliefert
+- `GET /api/v1/health` liefert 200
+- zentrale API-Endpunkte antworten erwartungskonform
+- Queue/Worker laufen ohne kritische Fehler
 
 ---
 
-## 8) Minimaler Smoke-Test nach Setup
+## 8) Synchronisationsregel für Doku
 
-Nach lokalem Start:
+Bei Änderungen an Setup, API-Scope oder Delivery-Status sind mindestens diese Dateien gemeinsam zu aktualisieren:
 
-1. Browser: `http://localhost:8000`
-2. API-Check: `GET /api/v1/health`
-3. Artisan-Test: `php artisan test`
-
-Wenn diese drei Punkte erfolgreich sind, gilt die Instanz als "testbereit".
-
----
-
-## 9) Hinweise für weitere Codex-Instanzen
-
-- Vor Änderungen immer den aktuellen Branch prüfen.
-- Änderungen an Setup/Deployment synchron in `README.md` und `spec.md` halten.
-- Für reproduzierbare Builds in CI möglichst feste Versionen von PHP/Node verwenden.
-- Bei optionalen Services (Meilisearch, Sentry) stets Fallback dokumentieren, damit Testläufe nicht blockieren.
+- `README.md`
+- `ROADMAP.md`
+- `PROGRESS.md`
+- `spec.md`
+- `docs/technische-spezifikation.md`
