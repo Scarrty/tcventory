@@ -81,4 +81,16 @@ class GameApiTest extends TestCase
         $this->postJson('/api/v1/games', ['name' => 'Unauthorized', 'slug' => 'unauthorized'])->assertForbidden();
         $this->patchJson("/api/v1/games/{$game->id}", ['name' => 'Nope'])->assertForbidden();
     }
+
+    public function test_destroy_soft_deletes_game_for_authorized_user(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.delete']);
+        Sanctum::actingAs($user);
+
+        $game = Game::factory()->create();
+
+        $this->deleteJson("/api/v1/games/{$game->id}")->assertNoContent();
+
+        $this->assertSoftDeleted('games', ['id' => $game->id]);
+    }
 }

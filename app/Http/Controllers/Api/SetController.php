@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreSetRequest;
 use App\Http\Requests\Api\UpdateSetRequest;
 use App\Models\Set;
+use App\Services\Catalog\DeleteSetService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -56,5 +57,14 @@ class SetController extends Controller
         return response()->json([
             'data' => $set->fresh()->load('game'),
         ]);
+    }
+
+    public function destroy(Set $set, DeleteSetService $service): JsonResponse
+    {
+        $this->authorize('delete', $set);
+
+        $service->execute($set);
+
+        return response()->json([], 204);
     }
 }

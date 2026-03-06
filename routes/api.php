@@ -23,10 +23,10 @@ Route::prefix('v1')->group(function (): void {
         ->middleware(['auth:sanctum', 'role:user|admin']);
 
     Route::middleware('auth:sanctum')->group(function (): void {
-        Route::apiResource('games', GameController::class)->only(['index', 'store', 'show', 'update']);
-        Route::apiResource('sets', SetController::class)->only(['index', 'store', 'show', 'update']);
-        Route::apiResource('products', ProductController::class)->only(['index', 'store', 'show', 'update']);
-        Route::apiResource('inventory-items', InventoryItemController::class)->only(['index', 'store', 'show', 'update']);
+        Route::apiResource('games', GameController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+        Route::apiResource('sets', SetController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+        Route::apiResource('products', ProductController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+        Route::apiResource('inventory-items', InventoryItemController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
         Route::post('inventory-items/{inventory_item}/transfer', [InventoryItemController::class, 'transfer']);
         Route::post('inventory-items/{inventory_item}/adjust-stock', [InventoryItemController::class, 'adjustStock']);
     });

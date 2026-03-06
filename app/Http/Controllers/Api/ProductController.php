@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreProductRequest;
 use App\Http\Requests\Api\UpdateProductRequest;
 use App\Models\Product;
+use App\Services\Catalog\DeleteProductService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -56,5 +57,14 @@ class ProductController extends Controller
         return response()->json([
             'data' => $product->fresh()->load(['game', 'set']),
         ]);
+    }
+
+    public function destroy(Product $product, DeleteProductService $service): JsonResponse
+    {
+        $this->authorize('delete', $product);
+
+        $service->execute($product);
+
+        return response()->json([], 204);
     }
 }

@@ -9,7 +9,9 @@ use App\Models\InventoryItem;
 use App\Models\InventoryMovement;
 use App\Models\Product;
 use App\Models\StorageLocation;
+use App\Services\Catalog\DeleteProductService;
 use App\Services\Inventory\AdjustInventoryStockService;
+use App\Services\Inventory\DeleteInventoryItemService;
 use App\Services\Inventory\TransferInventoryItemService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Validation\ValidationException;
@@ -49,6 +51,29 @@ class InventoryServicesTest extends TestCase
 
         $this->assertSame(3, $item->fresh()->quantity);
         $this->assertSame(1, InventoryMovement::query()->where('movement_type', 'transfer')->count());
+    }
+
+    public function test_delete_inventory_item_service_soft_deletes_and_logs_deletion(): void
+    {
+        $item = $this->createInventoryItem(quantity: 3);
+
+        app(DeleteInventoryItemService::class)->execute($item);
+
+        $this->assertSoftDeleted('inventory_items', ['id' => $item->id]);
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_item_id' => $item->id,
+            'movement_type' => 'deletion',
+            'quantity_delta' => -3,
+        ]);
+    }
+
+    public function test_delete_product_service_rejects_when_inventory_exists(): void
+    {
+        $item = $this->createInventoryItem(quantity: 1);
+
+        $this->expectException(ValidationException::class);
+
+        app(DeleteProductService::class)->execute($item->product);
     }
 
     private function createInventoryItem(int $quantity): InventoryItem
