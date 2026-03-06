@@ -20,14 +20,15 @@ Das Format orientiert sich an *Keep a Changelog* und verwendet semantische Versi
   - Architekturüberblick
   - API-Überblick
   - Entwicklungsleitplanken
-
 - Phase-1-Core-Migrationen für Katalog (`games`, `sets`, `products`), Inventar (`storage_locations`, `inventory_items`), Finance (`purchases`, `purchase_items`, `sales`, `sale_items`, `valuations`) und Audit/Ledger (`inventory_movements`, `audit_events`).
 - RBAC-Basis über `RolesAndPermissionsSeeder` inkl. Rollen (`admin`, `operator`, `accounting`, `viewer`) und initialen Permissions.
 - `DatabaseSeeder`-Verkettung für reproduzierbares Rollen-/Permission-Seeding und `User`-Modell mit `HasRoles`-Trait vorbereitet.
+- Review-Artefakt `docs/phase1-review.md` mit Soll-/Ist-Abgleich zu Phase 1 und priorisierten Maßnahmen.
 
 ### Changed
 
 - `README.md` von einer minimalen Kurzbeschreibung zu einer vollständigen Projekt-Einstiegsdokumentation erweitert.
+- Phase-1-Statusdokumente (`ROADMAP.md`, `PROGRESS.md`) mit einem expliziten Architektur-Review synchronisiert.
 
 ### Notes
 

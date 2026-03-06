@@ -4,7 +4,7 @@
 
 TCventory entwickelt sich von einer dokumentierten Basis hin zu einer produktionsnahen Inventar- und Finanzplattform für TCG-Bestände mit revisionssicherem Audit-Trail.
 
-## Phase 0 – Foundations (aktuell)
+## Phase 0 – Foundations (abgeschlossen)
 
 - Technische Spezifikation und Zielarchitektur dokumentiert
 - Projektstruktur als modulare Laravel-Organisation definiert
@@ -21,6 +21,8 @@ TCventory entwickelt sich von einer dokumentierten Basis hin zu einer produktion
   - Finanzflüsse (Purchases/Sales/Valuations)
   - Audit/Ledger (`inventory_movements`, `audit_events`)
 - Grundlegende Filament-Ressourcen für Stammdaten
+
+**Aktueller Stand (Review):** teilweise umgesetzt. Datenmodell und RBAC-Seeding sind vorbereitet, Runtime-/Paket-Setup, Auth-Flow und Filament-Ressourcen fehlen noch.
 
 ## Phase 2 – Inventory & Catalog MVP
 
