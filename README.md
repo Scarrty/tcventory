@@ -15,9 +15,9 @@ Dieses Repository enthält ein vollständiges Laravel-12-Projektgerüst mit migr
 
 ## Voraussetzungen
 
-- PHP `^8.2`
+- PHP `^8.4`
 - Composer `^2`
-- Node.js + npm (optional, für Frontend-Build)
+- Node.js `22 LTS` + npm (optional, für Frontend-Build; Version ist in `.nvmrc` gepinnt)
 
 ## Reproduzierbares Setup
 
