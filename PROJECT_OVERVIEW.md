@@ -119,9 +119,19 @@ Audit-Prinzip:
 
 ## 7. Aktueller Implementierungsstand
 
-Aktuell sind im Projekt grundlegende Health-/Status-Routen vorhanden:
+Unter `/api/v1` sind aktuell folgende Ressourcen und Funktionen produktiv umgesetzt:
 
-- `GET /` (Web-Status)
-- `GET /api/v1/health` (API-Status)
+- Health und Zugang:
+  - `GET /api/v1/health`
+  - `POST /api/v1/tokens`
+  - `GET /api/v1/me`
+- Katalog-Ressourcen:
+  - `games` (`index`, `store`, `show`, `update`, `destroy`)
+  - `sets` (`index`, `store`, `show`, `update`, `destroy`)
+  - `products` (`index`, `store`, `show`, `update`, `destroy`)
+- Inventar-Ressourcen:
+  - `inventory-items` (`index`, `store`, `show`, `update`, `destroy`)
+  - `POST /api/v1/inventory-items/{id}/transfer` (Umlagerung/Teilumlagerung)
+  - `POST /api/v1/inventory-items/{id}/adjust-stock` (Bestandskorrektur +/-)
 
-Die fachliche Architektur und der Zielumfang sind in der technischen Spezifikation ausformuliert und in den neuen Top-Level-Dokumenten strukturiert zusammengefasst.
+Damit ist neben dem reinen CRUD bereits ein wesentlicher Teil der operativen Bestandslogik (Transfer und Korrekturbuchung inkl. Bewegungsprotokollierung) im API-Layer verfügbar.
