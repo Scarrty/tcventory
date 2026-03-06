@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\AdjustInventoryStockRequest;
 use App\Http\Requests\Api\StoreInventoryItemRequest;
+use App\Http\Requests\Api\TransferInventoryItemRequest;
 use App\Http\Requests\Api\UpdateInventoryItemRequest;
 use App\Models\InventoryItem;
+use App\Services\Inventory\AdjustInventoryStockService;
+use App\Services\Inventory\TransferInventoryItemService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -60,6 +64,35 @@ class InventoryItemController extends Controller
 
         return response()->json([
             'data' => $inventoryItem->fresh()->load(['product.game', 'product.set', 'storageLocation']),
+        ]);
+    }
+
+    public function transfer(TransferInventoryItemRequest $request, InventoryItem $inventoryItem, TransferInventoryItemService $service): JsonResponse
+    {
+        $updatedInventoryItem = $service->execute(
+            $inventoryItem,
+            $request->integer('quantity'),
+            $request->integer('target_storage_location_id'),
+            $request->string('reason')->toString() !== '' ? $request->string('reason')->toString() : null,
+            $request->string('request_key')->toString() !== '' ? $request->string('request_key')->toString() : null,
+        );
+
+        return response()->json([
+            'data' => $updatedInventoryItem->load(['product.game', 'product.set', 'storageLocation']),
+        ]);
+    }
+
+    public function adjustStock(AdjustInventoryStockRequest $request, InventoryItem $inventoryItem, AdjustInventoryStockService $service): JsonResponse
+    {
+        $updatedInventoryItem = $service->execute(
+            $inventoryItem,
+            $request->integer('quantity_delta'),
+            $request->string('reason')->toString() !== '' ? $request->string('reason')->toString() : null,
+            $request->string('request_key')->toString() !== '' ? $request->string('request_key')->toString() : null,
+        );
+
+        return response()->json([
+            'data' => $updatedInventoryItem->load(['product.game', 'product.set', 'storageLocation']),
         ]);
     }
 }
