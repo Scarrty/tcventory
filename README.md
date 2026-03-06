@@ -62,7 +62,7 @@ Folgende Quality Gates sind definiert:
 - `vendor/bin/phpstan analyse`
 - `php artisan test`
 
-Für die Testausführung sind in CI Services für MySQL (Datenbank) und Redis konfiguriert.
+Für die Testausführung sind in CI Services für PostgreSQL (Datenbank) und Redis konfiguriert.
 
 ## Migrierte projektspezifische Dateien
 

@@ -69,17 +69,16 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:16
         env:
-          MYSQL_DATABASE: tcventory_test
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_USER: tcventory
-          MYSQL_PASSWORD: secret
+          POSTGRES_DB: tcventory_test
+          POSTGRES_USER: tcventory
+          POSTGRES_PASSWORD: secret
         ports:
-          - 3306:3306
+          - 5432:5432
         options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -proot"
+          --health-cmd="pg_isready -h 127.0.0.1 -p 5432 -U tcventory"
           --health-interval=10s
           --health-timeout=5s
           --health-retries=10
@@ -97,9 +96,9 @@ jobs:
     env:
       APP_ENV: testing
       APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
-      DB_CONNECTION: mysql
+      DB_CONNECTION: pgsql
       DB_HOST: 127.0.0.1
-      DB_PORT: 3306
+      DB_PORT: 5432
       DB_DATABASE: tcventory_test
       DB_USERNAME: tcventory
       DB_PASSWORD: secret
@@ -116,7 +115,7 @@ jobs:
         with:
           php-version: '8.3'
           coverage: none
-          extensions: mbstring, pdo_mysql, redis
+          extensions: mbstring, pdo_pgsql, redis
 
       - name: Cache Composer dependencies
         uses: actions/cache@v4

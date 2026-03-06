@@ -35,7 +35,7 @@ Die Anwendung folgt einer modularen, schichtenorientierten Architektur:
    - Domänenregeln für Bestand, Bewertungen, Gebühren, Audit-Events
 
 4. **Infrastructure Layer**
-   - PostgreSQL/MySQL
+   - PostgreSQL
    - Redis (Cache, Queues)
    - Horizon (Queue Monitoring)
    - Optional: Meilisearch für Volltextsuche
@@ -45,7 +45,7 @@ Die Anwendung folgt einer modularen, schichtenorientierten Architektur:
 
 - **Nutzer (Admin, Inventory Manager, Sales Manager, Viewer)** greifen via Browser/Mobile auf TCventory zu.
 - TCventory interagiert mit:
-  - **PostgreSQL/MySQL** (persistente Daten)
+  - **PostgreSQL** (persistente Daten)
   - **Redis** (Queue, Cache, Locks)
   - **Queue Worker/Horizon** (asynchrone Jobs)
   - **Meilisearch** (optional)

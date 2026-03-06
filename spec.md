@@ -43,7 +43,6 @@ TCventory ist eine Web-App zur Inventarverwaltung von TCG-Karten und Sealed-Prod
 
 **Datenbanken**
 - PostgreSQL (empfohlen)
-- MySQL (unterstützt)
 
 **Infra / Async / Search**
 - Redis
@@ -71,7 +70,7 @@ Die Instanz sollte folgende Tools verfügbar haben:
 - `php` (>= 8.4)
 - `composer`
 - `node` + `npm`
-- `psql` **oder** `mysql` Client (je nach DB)
+- `psql` Client
 - optional: `redis-cli`, `meilisearch`
 
 ### Quick-Check
@@ -118,7 +117,7 @@ Folgende Variablen müssen konsistent gesetzt werden:
 - `APP_ENV=local` (für lokale Instanzen)
 - `APP_DEBUG=true` (nur lokal)
 - `APP_URL=http://localhost:8000`
-- `DB_CONNECTION=pgsql` (oder `mysql`)
+- `DB_CONNECTION=pgsql`
 - `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
 - `CACHE_STORE=redis` (oder Datei-Cache für Minimal-Setup)
 - `QUEUE_CONNECTION=redis`
