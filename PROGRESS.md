@@ -6,7 +6,7 @@ Umsetzungs- und Qualitäts-Tracking für **ROADMAP Phase 1 – Core Platform Set
 ## Phase-1-Status (Gesamt)
 - **Status:** Abgeschlossen
 - **Fortschritt:** 100%
-- **Stand:** Runtime, AuthN/AuthZ, Core-Migrationen, Filament-Stammdaten und CI-Qualitätsgates sind umgesetzt und verifiziert.
+- **Stand:** Runtime, AuthN/AuthZ, Core-Migrationen, Filament-Stammdaten und Quality-Gates sind umgesetzt und mit aktuellem Re-Check verifiziert.
 
 ## Arbeitspakete
 
@@ -16,7 +16,7 @@ Umsetzungs- und Qualitäts-Tracking für **ROADMAP Phase 1 – Core Platform Set
 | WP2: AuthN/AuthZ | Auth + Rollen/Berechtigungen einführen | Done | 100% | Breeze-Auth, Sanctum-Token-Flow, Spatie-RBAC mit Seeder und Zugriffstests umgesetzt. |
 | WP3: Core-Migrationen | Katalog, Inventar, Finance, Audit/Ledger vorbereiten | Done | 100% | Migrationen für alle Phase-1-Domänen vorhanden und testbar. |
 | WP4: Filament-Stammdaten | Erste Admin-Ressourcen für Stammdaten | Done | 100% | Ressourcen für Games, Sets, Products, Storage Locations inkl. Policies vorhanden. |
-| WP5: Qualitäts-Gates | Pint, PHPStan, Tests als Gates | Done | 100% | CI-Workflow aktiv; lokale Gate-Reproduktion erfolgreich, inklusive behobener Pint-Fehler. |
+| WP5: Qualitäts-Gates | Pint, PHPStan, Tests als Gates | Done | 100% | Pint und Tests laufen lokal grün; PHPStan-Gate durch Entfernen eines veralteten Ignore-Patterns stabilisiert. |
 
 ## Qualitätsziele
 
@@ -32,8 +32,8 @@ Umsetzungs- und Qualitäts-Tracking für **ROADMAP Phase 1 – Core Platform Set
 Detailprüfung in `docs/phase1-review.md`:
 
 1. **Erfolgreich umgesetzt:** Runtime-Setup, Auth-Stack (Breeze/Sanctum), RBAC, Core-Schema und Filament-Stammdaten.
-2. **CI-Fehler behoben:** Pint-Style-Verstöße in Migrationen/Seeder formatiert.
-3. **Aktueller Fokus:** Umsetzung der produktnahen Use-Cases aus Phase 2+.
+2. **Qualitätsgates aktualisiert:** Veraltetes PHPStan-Ignore-Pattern entfernt; Pint und Tests bestätigt.
+3. **Operative Reproduzierbarkeit:** Für lokale Feature-Tests sind `.env`-Erzeugung und Frontend-Build erforderlich.
 
 ## Nächste 3 Schritte
 

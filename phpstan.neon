@@ -6,5 +6,4 @@ parameters:
         - database
         - routes
     ignoreErrors:
-        - '#Access to constant ATTR_SSL_CA on an unknown class Pdo\\Mysql#'
         - '#Undefined variable: \$this#'
