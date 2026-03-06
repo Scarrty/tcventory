@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -31,22 +32,12 @@ class RolesAndPermissionsSeeder extends Seeder
         'admin.access',
     ];
 
-    public function run(): void
-    {
-        app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-        foreach (self::PERMISSIONS as $permission) {
-            Permission::findOrCreate($permission, 'web');
-        }
-
-        $admin = Role::findOrCreate('admin', 'web');
-        $operator = Role::findOrCreate('operator', 'web');
-        $accounting = Role::findOrCreate('accounting', 'web');
-        $viewer = Role::findOrCreate('viewer', 'web');
-
-        $admin->syncPermissions(self::PERMISSIONS);
-
-        $operator->syncPermissions([
+    /**
+     * @var array<string, array<int, string>>
+     */
+    private const ROLE_PERMISSIONS = [
+        'admin' => self::PERMISSIONS,
+        'operator' => [
             'catalog.view',
             'catalog.create',
             'catalog.update',
@@ -54,21 +45,56 @@ class RolesAndPermissionsSeeder extends Seeder
             'inventory.create',
             'inventory.update',
             'audit.view',
-        ]);
-
-        $accounting->syncPermissions([
+        ],
+        'accounting' => [
             'finance.view',
             'finance.create',
             'finance.update',
             'inventory.view',
             'audit.view',
-        ]);
-
-        $viewer->syncPermissions([
+        ],
+        'viewer' => [
             'catalog.view',
             'inventory.view',
             'finance.view',
             'audit.view',
-        ]);
+        ],
+    ];
+
+    public function run(): void
+    {
+        $permissionRegistrar = app(PermissionRegistrar::class);
+        $permissionRegistrar->forgetCachedPermissions();
+
+        DB::transaction(function (): void {
+            $this->seedPermissions();
+            $this->seedRoles();
+        });
+
+        $permissionRegistrar->forgetCachedPermissions();
+    }
+
+    private function seedPermissions(): void
+    {
+        $timestamp = now();
+
+        Permission::query()->upsert(
+            array_map(static fn (string $name): array => [
+                'name' => $name,
+                'guard_name' => 'web',
+                'created_at' => $timestamp,
+                'updated_at' => $timestamp,
+            ], self::PERMISSIONS),
+            ['name', 'guard_name'],
+            ['updated_at']
+        );
+    }
+
+    private function seedRoles(): void
+    {
+        foreach (self::ROLE_PERMISSIONS as $roleName => $permissions) {
+            $role = Role::findOrCreate($roleName, 'web');
+            $role->syncPermissions($permissions);
+        }
     }
 }
