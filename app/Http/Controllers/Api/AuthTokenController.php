@@ -14,7 +14,7 @@ class AuthTokenController extends Controller
     public function store(CreateAuthTokenRequest $request): JsonResponse
     {
         $validated = $request->validated();
-        $abilities = $validated['abilities'] ?? ['*'];
+        $abilities = $validated['abilities'] ?? ['inventory:read'];
         $expiresAt = isset($validated['expires_in_minutes'])
             ? CarbonImmutable::now()->addMinutes($validated['expires_in_minutes'])
             : null;
