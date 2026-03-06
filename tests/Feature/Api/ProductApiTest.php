@@ -85,4 +85,16 @@ class ProductApiTest extends TestCase
         $this->getJson('/api/v1/products')->assertOk();
         $this->patchJson("/api/v1/products/{$product->id}", ['rarity' => 'mythic'])->assertForbidden();
     }
+
+    public function test_destroy_soft_deletes_product_for_authorized_user(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.delete']);
+        Sanctum::actingAs($user);
+
+        $product = Product::factory()->create();
+
+        $this->deleteJson("/api/v1/products/{$product->id}")->assertNoContent();
+
+        $this->assertSoftDeleted('products', ['id' => $product->id]);
+    }
 }

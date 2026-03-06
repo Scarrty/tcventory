@@ -11,6 +11,7 @@ use App\Http\Requests\Api\TransferInventoryItemRequest;
 use App\Http\Requests\Api\UpdateInventoryItemRequest;
 use App\Models\InventoryItem;
 use App\Services\Inventory\AdjustInventoryStockService;
+use App\Services\Inventory\DeleteInventoryItemService;
 use App\Services\Inventory\TransferInventoryItemService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,6 +66,15 @@ class InventoryItemController extends Controller
         return response()->json([
             'data' => $inventoryItem->fresh()->load(['product.game', 'product.set', 'storageLocation']),
         ]);
+    }
+
+    public function destroy(InventoryItem $inventoryItem, DeleteInventoryItemService $service): JsonResponse
+    {
+        $this->authorize('delete', $inventoryItem);
+
+        $service->execute($inventoryItem);
+
+        return response()->json([], 204);
     }
 
     public function transfer(TransferInventoryItemRequest $request, InventoryItem $inventoryItem, TransferInventoryItemService $service): JsonResponse

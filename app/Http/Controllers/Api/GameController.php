@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreGameRequest;
 use App\Http\Requests\Api\UpdateGameRequest;
 use App\Models\Game;
+use App\Services\Catalog\DeleteGameService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -56,5 +57,14 @@ class GameController extends Controller
         return response()->json([
             'data' => $game->fresh(),
         ]);
+    }
+
+    public function destroy(Game $game, DeleteGameService $service): JsonResponse
+    {
+        $this->authorize('delete', $game);
+
+        $service->execute($game);
+
+        return response()->json([], 204);
     }
 }

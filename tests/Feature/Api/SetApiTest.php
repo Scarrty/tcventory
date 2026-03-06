@@ -78,4 +78,16 @@ class SetApiTest extends TestCase
         $this->getJson('/api/v1/sets')->assertOk();
         $this->patchJson("/api/v1/sets/{$set->id}", ['name' => 'Nope'])->assertForbidden();
     }
+
+    public function test_destroy_soft_deletes_set_for_authorized_user(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.delete']);
+        Sanctum::actingAs($user);
+
+        $set = Set::factory()->create();
+
+        $this->deleteJson("/api/v1/sets/{$set->id}")->assertNoContent();
+
+        $this->assertSoftDeleted('sets', ['id' => $set->id]);
+    }
 }

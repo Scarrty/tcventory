@@ -129,4 +129,21 @@ class InventoryItemApiTest extends TestCase
         $this->assertDatabaseHas('inventory_items', ['id' => $inventoryItem->id, 'quantity' => 2]);
         $this->assertSame(1, InventoryMovement::query()->where('movement_type', 'adjustment')->count());
     }
+
+    public function test_destroy_soft_deletes_inventory_item_and_archives_movement(): void
+    {
+        $user = $this->createUserWithPermissions(['inventory.delete']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem] = $this->createInventoryFixture(quantity: 4);
+
+        $this->deleteJson("/api/v1/inventory-items/{$inventoryItem->id}")->assertNoContent();
+
+        $this->assertSoftDeleted('inventory_items', ['id' => $inventoryItem->id]);
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_item_id' => $inventoryItem->id,
+            'movement_type' => 'deletion',
+            'quantity_delta' => -4,
+        ]);
+    }
 }
