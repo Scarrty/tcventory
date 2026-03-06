@@ -1,5 +1,11 @@
 # TCventory – Spezifikation & Setup-Guide für Codex-Instanzen
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 ## 1) Zweck dieses Dokuments
 Dieses Dokument beschreibt, wie eine **andere Codex-Instanz** das Projekt TCventory reproduzierbar
 

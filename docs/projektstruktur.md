@@ -1,5 +1,11 @@
 # Projektstruktur – TCventory
 
+
+## Dokumentationsstatus
+
+- Stand: 2026-03-06
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+
 Diese Struktur bildet die in der technischen Spezifikation beschriebene modulare Laravel-Organisation ab.
 
 ```text
