@@ -7,6 +7,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class InventoryItem extends Model
 {
@@ -33,6 +34,7 @@ class InventoryItem extends Model
     {
         return [
             'acquired_at' => 'datetime',
+            'quantity' => 'integer',
         ];
     }
 
@@ -44,5 +46,15 @@ class InventoryItem extends Model
     public function storageLocation(): BelongsTo
     {
         return $this->belongsTo(StorageLocation::class);
+    }
+
+    public function inventoryMovements(): HasMany
+    {
+        return $this->hasMany(InventoryMovement::class);
+    }
+
+    public function valuations(): HasMany
+    {
+        return $this->hasMany(Valuation::class);
     }
 }
