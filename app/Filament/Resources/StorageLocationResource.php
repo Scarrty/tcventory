@@ -53,7 +53,7 @@ class StorageLocationResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()?->can('viewAny', StorageLocation::class) ?? false;
+        return static::canAccess();
     }
 
     public static function canAccess(): bool

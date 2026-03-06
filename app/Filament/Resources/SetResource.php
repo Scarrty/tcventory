@@ -55,7 +55,7 @@ class SetResource extends Resource
 
     public static function shouldRegisterNavigation(): bool
     {
-        return Auth::user()?->can('viewAny', Set::class) ?? false;
+        return static::canAccess();
     }
 
     public static function canAccess(): bool

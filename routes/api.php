@@ -13,7 +13,7 @@ Route::prefix('v1')->group(function (): void {
     ]);
 
     Route::post('/tokens', [AuthTokenController::class, 'store'])
-        ->middleware('auth');
+        ->middleware('auth:sanctum');
 
     Route::get('/me', CurrentUserController::class)
         ->middleware(['auth:sanctum', 'role:user|admin']);
