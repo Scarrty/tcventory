@@ -1,31 +1,34 @@
 # PROGRESS
 
 ## Scope
-Umsetzungs- und Qualitäts-Tracking für **ROADMAP Phase 2 – Inventory & Catalog MVP**.
+Umsetzungs- und Qualitäts-Tracking für den aktuellen Lieferstand mit Fokus auf **ROADMAP Phase 2/3**.
 
-## Phase 2 – Inventory & Catalog MVP (Gesamt)
-- **Status:** In Arbeit
-- **Fortschritt:** 40%
-- **Stichtag:** 2026-03-31
-- **Entscheidungs- und Auditbasis:** `docs/phase2-review.md`
+## Gesamtstand
 
-## Arbeitspakete (Phase 2)
+| Bereich | Status | Fortschritt | Referenz |
+|---|---|---:|---|
+| Phase 0 – Foundations | Abgeschlossen | 100% | `ROADMAP.md` |
+| Phase 1 – Core Platform Setup | Abgeschlossen | 100% | `docs/phase1-review.md` |
+| Phase 2 – Inventory & Catalog MVP | In finaler Konsolidierung | 90% | `docs/current-state-roadmap-review.md` |
+| Phase 3 – Finance & Valuation | Teilweise umgesetzt | 55% | `docs/current-state-roadmap-review.md` |
+| Phase 4 – Audit/Operations | Vorbereitung | 20% | `docs/current-state-roadmap-review.md` |
+| Phase 5 – Skalierung/Integrationen | Geplant | 5% | `ROADMAP.md` |
+
+## Arbeitspakete (aktiver Fokus)
 
 | Paket | Ziel | Status | Fortschritt | Messbare Kriterien | Ergebnis/Notizen |
 |---|---|---|---:|---|---|
-| WP2.1: CRUD für Games/Sets/Products | Vollständige Verwaltung der Katalogstammdaten | In Arbeit | 60% | - `POST/GET/PATCH/DELETE`-Endpunkte für Games, Sets und Products vorhanden.<br>- Validierungsregeln für Pflichtfelder und Relationen aktiv.<br>- Soft-Delete/Hard-Delete-Verhalten dokumentiert und getestet. | Create/Read/Update sind weitgehend umgesetzt; DELETE-Absicherung und Doku-Finish offen. |
-| WP2.2: Inventar inkl. Zustand/Grading | Inventarpositionen mit Qualität/Condition belastbar führen | In Arbeit | 50% | - Inventar-Model enthält Zustand/Grading-Felder mit erlaubten Wertebereichen.<br>- Erfassung und Änderung von Grading über API/Admin möglich.<br>- Historisierung relevanter Zustandsänderungen nachweisbar. | Grundmodell und Felder vorhanden; durchgängige Workflow-Tests für Grading-Änderungen offen. |
-| WP2.3: Lagerortverwaltung & Bestands-Transfer | Transfers zwischen Lagerorten konsistent und nachvollziehbar | In Arbeit | 35% | - Lagerorte per CRUD verwaltbar.<br>- Transfer-Endpoint bucht Quelle/Ziel atomar.<br>- Negativbestände werden technisch verhindert und validiert. | Lagerortbasis steht; atomare Transferlogik + Grenzfall-Tests müssen abgeschlossen werden. |
-| WP2.4: API-v1 für Katalog + Inventar | Stabile API-v1 als Integrationsbasis bereitstellen | In Arbeit | 30% | - Alle Phase-2-Ressourcen unter `/api/v1` verfügbar.<br>- Fehlerformat und HTTP-Statuscodes konsistent.<br>- AuthN/AuthZ auf allen mutierenden Endpunkten verifiziert. | Erste Endpunkte vorhanden; Konsistenz von Response-Contracts und Policy-Abdeckung noch unvollständig. |
-| WP2.5: Tests (Feature + Unit) | Kern-Use-Cases automatisiert absichern | In Arbeit | 25% | - Feature-Tests für CRUD vollständig (inkl. DELETE) vorhanden.<br>- Feature-Tests für Transfer- und Grading-Flows vorhanden.<br>- Unit-Tests für Domainregeln/Services mit kritischen Validierungen vorhanden. | Testbasis existiert, deckt aber noch nicht alle Phase-2-Akzeptanzkriterien vollständig ab. |
+| WP2.1: API-CRUD Katalog/Inventar | Vollständige API-Basis für Kernentitäten | Fast abgeschlossen | 95% | CRUD inkl. Delete für `games`, `sets`, `products`, `inventory-items`; Auth/Policy-Schutz aktiv | Implementiert; Restaufwand liegt primär in Dokumentations-Feinschliff und Contract-Härtung. |
+| WP2.2: Inventarbewegungen | Transfer/Korrektur fachlich stabil | In Arbeit | 85% | `transfer` und `adjust-stock` transaktional; Negativbestände verhindert; Tests für Kernfälle vorhanden | Technisch funktionsfähig; zusätzliche Randfall- und Contract-Tests sinnvoll. |
+| WP2.3: API-Contract-Konsistenz | Einheitliches Verhalten über alle Endpunkte | In Arbeit | 70% | Konsistente Fehlerstruktur, Statuscodes und Pagination über Ressourcen hinweg | Teile bereits einheitlich; Harmonisierung noch nicht vollständig nachgezogen. |
+| WP3.1: Finance-Transaktionen | Einkauf/Verkauf/Bewertung produktiv nutzbar | In Arbeit | 60% | `purchases`, `sales`, `valuations` inkl. Validierung + Policies; request_key-Idempotenz für kritische Flows | Implementiert; fachliche Tiefe für Auswertungen wächst in nächsten Iterationen. |
+| WP3.2: Finance-Reporting | Steuerungsfähige Kennzahlen bereitstellen | In Arbeit | 45% | `reports/finance-summary` vorhanden; zusätzliche periodisierte Reports und Drilldowns offen | Basisreport live, erweiterte P/L-Sichten noch offen. |
+| WP4.1: Audit-Chain | Revisionssichere Hash-Kette im Anwendungscode | Geplant | 20% | Append-only Enforcement, Hash-Verkettung, Integritätstests | Datenmodell steht, durchgängige Anwendungskette fehlt noch. |
+| WPQ.1: Qualitätsgates | Reproduzierbar grüne Local-/CI-Gates | In Arbeit | 50% | Pint, PHPStan, Tests stabil grün in lokaler und CI-Ausführung | Letzte Review zeigte Defizite; Priorität bleibt hoch. |
 
-## Review-Status (Phase 2)
+## Nächste Schritte
 
-Die laufende Bewertung, offene Punkte und Freigabeentscheidungen werden in `docs/phase2-review.md` geführt.
-
-## Nächste Schritte (nur offene Phase-2-Lücken)
-
-1. DELETE-Pfade für Katalog-CRUD vollständig absichern (Policies, Validierung, Feature-Tests).
-2. Transfer-Workflow fachlich abschließen: atomare Buchung, Negativbestands-Schutz und Fehlerfälle testen.
-3. API-v1-Contracts vereinheitlichen (Response-Format, Statuscodes, Fehlermeldungen) und regressionssicher testen.
-4. Testlücken schließen: vollständige Feature-Suite für CRUD/Grading/Transfer sowie ergänzende Unit-Tests für Domainregeln.
+1. API-Contract-Harmonisierung (Fehlerformat/Statuscodes/Pagination) abschließen und regressionssicher testen.
+2. Finance-Reporting um periodisierte und kanalbezogene P/L-Auswertungen erweitern.
+3. Audit-Hash-Chain für kritische Write-Flows umsetzen (mindestens Transfer und Sale).
+4. Qualitätsgates lokal und in CI dauerhaft stabilisieren.

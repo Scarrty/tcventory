@@ -2,68 +2,63 @@
 
 ## Zielbild
 
-TCventory entwickelt sich von einer dokumentierten Basis hin zu einer produktionsnahen Inventar- und Finanzplattform für TCG-Bestände mit revisionssicherem Audit-Trail.
+TCventory entwickelt sich von einer dokumentierten Basis zu einer produktionsnahen Inventar- und Finanzplattform für TCG-Bestände mit nachvollziehbaren Inventarbewegungen, belastbaren Finanzkennzahlen und auditfähigen Prozessen.
 
 ## Phase 0 – Foundations (abgeschlossen)
 
 - Technische Spezifikation und Zielarchitektur dokumentiert
-- Projektstruktur als modulare Laravel-Organisation definiert
-- Basis-Routen für Web/API-Status vorhanden (`/`, `/api/v1/health`)
 - Top-Level-Dokumentation konsolidiert
+- Basis-Routen für Web/API-Status vorhanden (`/`, `/api/v1/health`)
 
-## Phase 1 – Core Platform Setup
+## Phase 1 – Core Platform Setup (abgeschlossen)
 
-- Laravel-Basis-Setup finalisieren (Env, DB, Redis, Queue)
-- Authentifizierung + Rollen/Berechtigungen einführen
-- Migrationen für Kernentitäten erstellen:
-  - Katalog (Games/Sets/Products)
-  - Inventar (`inventory_items`, `storage_locations`)
-  - Finanzflüsse (Purchases/Sales/Valuations)
-  - Audit/Ledger (`inventory_movements`, `audit_events`)
-- Grundlegende Filament-Ressourcen für Stammdaten
+- Laravel-Setup inkl. Docker-Basis und CI-Qualitätsgates eingerichtet
+- Authentifizierung (Breeze + Sanctum) umgesetzt
+- RBAC mit Rollen/Permissions und Policies eingeführt
+- Kernmigrationen für Katalog, Inventar, Finance, Audit/Ledger vorhanden
+- Filament-Basisressourcen für Stammdaten umgesetzt
 
-**Aktueller Stand (Review):** abgeschlossen. Runtime, Auth (Breeze/Sanctum), RBAC, Core-Migrationen, Filament-Basisressourcen sowie CI-Gates (Pint/PHPStan/Tests) sind umgesetzt.
+## Phase 2 – Inventory & Catalog MVP (nahe Abschluss)
 
-## Phase 2 – Inventory & Catalog MVP
+- API-CRUD für `games`, `sets`, `products`, `inventory-items` inkl. Delete umgesetzt
+- Inventarverwaltung inkl. Zustand/Grading im API-Flow vorhanden
+- Lagerortverwaltung via Filament und Bestandsoperationen per API verfügbar
+- Transfer (`/transfer`) und Korrektur (`/adjust-stock`) transaktional umgesetzt
+- Feature- und Unit-Tests für zentrale Catalog/Inventory-Use-Cases vorhanden
 
-- CRUD für Games/Sets/Products
-- Inventarverwaltung inkl. Zustand/Grading
-- Lagerortverwaltung und Bestands-Transfer
-- API-v1-Endpunkte für Katalog + Inventar bereitstellen
-- Tests für zentrale Use Cases (Feature + Unit)
+## Phase 3 – Finance & Valuation (teilweise umgesetzt)
 
-## Phase 3 – Finance & Valuation
+- Einkauf, Verkauf und Bewertungen als API-Ressourcen implementiert
+- Idempotente POST-Flows über `request_key` für Purchases/Sales umgesetzt
+- Aggregierter Finanzreport (`/api/v1/reports/finance-summary`) verfügbar
+- Offene Lücken:
+  - vertiefte P/L-Analysen (periodisiert, kanalbezogen, realisiert/unrealisiert)
+  - weitergehende Reporting- und Kostenallokationslogik
 
-- Einkauf inkl. Nebenkosten und Zuordnung zu Bestand
-- Bewertungen (manuell/Markt/API-gestützt) historisieren
-- Verkauf inkl. Gebühren, Versand und Netto-Berechnung
-- Erste Profit/Loss-Auswertungen
-- Idempotente POST-Flows für kritische Finanzoperationen
+## Phase 4 – Audit, Reporting & Operations (in Vorbereitung)
 
-## Phase 4 – Audit, Reporting & Operations
+- Datenmodell für Audit/Ledger ist angelegt
+- Noch offen für Abschluss:
+  - systemweit erzwungene append-only Audit-Hash-Chain
+  - vollständige Audit-Abdeckung für alle kritischen Write-Flows
+  - dokumentierte Operations-Reife mit Horizon/Sentry-Runbooks
 
-- Vollständiger append-only Audit-Trail mit Hash-Kette
-- Bewegungsledger für jede bestandsrelevante Änderung
-- Reporting-Module (Bestandswert, Umschlag, P/L)
-- Queue-gestützte Prozesse (Import, Repricing, Aggregation)
-- Monitoring/Alerting mit Sentry + Horizon
-
-## Phase 5 – Skalierung & Integrationen
+## Phase 5 – Skalierung & Integrationen (geplant)
 
 - Optional: Meilisearch für Volltext-/Facettensuche
 - Performance-Tuning und Index-Optimierung
 - Externe Integrationen (Marktplätze, Preisdatenquellen)
-- API-Härtung, Dokumentation und Versionierungsstrategie ausbauen
+- API-Härtung und Versionierungsstrategie ausbauen
 
 ## Laufende Qualitätsziele
 
 - Sicherheitsstandards (RBAC, Validierung, Secret-Handling)
 - Konsistente Transaktionen in kritischen Prozessen
-- Testabdeckung für Domainlogik und API-Flows
-- Coding-Standards über Pint, statische Analyse via PHPStan
+- Stabile Quality Gates: Pint, PHPStan, Test-Suite
+- Konsistente API-Contracts (Statuscodes, Fehlerformate, Pagination)
 
-## Technische Upgrade-Initiative – PHP 8.4 & LTS-Stack (geplant)
+## Technische Upgrade-Initiative – PHP 8.4 & LTS-Stack (in Arbeit)
 
-- Geplantes Upgrade der Runtime-Anforderung auf PHP 8.4
-- LTS-Harmonisierung des gesamten Stacks (Backend, Frontend-Build, Infrastruktur)
+- Runtime-Anforderung auf PHP 8.4 ausgerichtet
+- LTS-Harmonisierung des Stacks (Backend, Frontend-Build, Infrastruktur)
 - Detaillierter Ablauf inkl. Risiko- und Rollback-Plan in `docs/php84-lts-upgrade-plan.md`
