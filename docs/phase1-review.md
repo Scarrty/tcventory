@@ -1,51 +1,41 @@
 # Phase-1-Review (Architektur- und Umsetzungscheck)
 
 ## Ziel der Prüfung
-Validierung, ob **ROADMAP Phase 1 – Core Platform Setup** im aktuellen Repository-Stand korrekt umgesetzt wurde und ob die Doku-Artefakte konsistent/aktuell sind.
+Validierung, ob **ROADMAP Phase 1 – Core Platform Setup** im aktuellen Repository-Stand umgesetzt wurde und ob die CI-Qualitätsgates stabil laufen.
 
 ## Bewertungsbasis
 
 Geprüfte Artefakte:
 - Planung/Doku: `ROADMAP.md`, `PROGRESS.md`, `docs/phase1-bootstrap.md`, `README.md`
-- Umsetzungsstand: Migrationen, Seeder, `User`-Modell, Basisrouten
+- Umsetzung: Auth-Stack, RBAC, Filament-Ressourcen, Migrationen, Policies, API-Endpunkte
+- CI/Gates: `.github/workflows/ci.yml`, `vendor/bin/pint --test`, `vendor/bin/phpstan analyse`, `php artisan test`
 
 ## Ergebnisübersicht
 
 | Bereich | Soll laut Phase 1 | Ist im Repository | Bewertung |
 |---|---|---|---|
-| Runtime-Setup | Laravel Runtime inkl. Env/DB/Redis/Queue | Setup nur dokumentiert, Laufzeitbasis aktuell nicht nachweisbar | 🔶 Teilweise |
-| Authentifizierung | Breeze + Sanctum lauffähig | Nicht erkennbar implementiert | ❌ Offen |
-| Rollen/Berechtigungen | Spatie RBAC inkl. Seed | Seeder + `HasRoles` umgesetzt | ✅ Weitgehend |
-| Core-Migrationen | Katalog, Inventar, Finance, Audit/Ledger | Alle geforderten Migrationsgruppen vorhanden | ✅ Weitgehend |
-| Filament-Stammdaten | Basisressourcen für Stammdaten | Keine Filament-Ressourcen vorhanden | ❌ Offen |
-| Quality Gates | Pint/PHPStan/Tests als Gate | Bisher nicht als laufende Pipeline nachweisbar | 🔶 Teilweise |
+| Runtime-Setup | Laravel Runtime inkl. Env/DB/Redis/Queue | Vollständige Laravel-12-Basis inkl. Composer/NPM, `.env`-Flow und Migrationsfähigkeit vorhanden | ✅ Erfüllt |
+| Authentifizierung | Breeze + Sanctum lauffähig | Breeze-Auth-Controller/-Routes sowie Sanctum-Token-Endpunkte und Feature-Tests vorhanden | ✅ Erfüllt |
+| Rollen/Berechtigungen | Spatie RBAC inkl. Seed | Seeder, `HasRoles` im `User`-Modell sowie rollenbasierte Zugriffsprüfung umgesetzt | ✅ Erfüllt |
+| Core-Migrationen | Katalog, Inventar, Finance, Audit/Ledger | Alle Migrationsgruppen vorhanden und durch Tests nutzbar | ✅ Erfüllt |
+| Filament-Stammdaten | Basisressourcen für Stammdaten | Ressourcen für `Game`, `Set`, `Product`, `StorageLocation` inkl. Zugriffskontrolle vorhanden | ✅ Erfüllt |
+| Quality Gates | Pint/PHPStan/Tests als Gate | CI-Workflow vorhanden; lokale Reproduktion erfolgreich nach Pint-Formatfix | ✅ Erfüllt |
 
-## Feststellungen im Detail
+## CI-Fehleranalyse und Behebung
 
-### 1) Datenmodell / Migrationen
-- Katalogtabellen (`games`, `sets`, `products`) mit sinnvollen Unique-/Index-Definitionen vorhanden.
-- Inventartabellen (`storage_locations`, `inventory_items`) mit FK-Strategie und Indizes vorhanden.
-- Finance-Bereich (`purchases`, `purchase_items`, `sales`, `sale_items`, `valuations`) strukturell konsistent aufgesetzt.
-- Audit/Ledger (`inventory_movements`, `audit_events`) inkl. Hash-Feldern und Indizes vorbereitet.
+### Befund
+Der CI-Fehler war reproduzierbar im Pint-Step (`vendor/bin/pint --test`) mit 5 Style-Verstößen:
+- 4x `braces_position` in den Phase-1-Migrationen
+- 1x `ordered_imports` im RBAC-Seeder
 
-**Bewertung:** Phase-1-Scope für Schema-Basis wurde sehr gut getroffen; verbleibendes Risiko ist fehlende Runtime-Ausführung als Integrationsnachweis.
+### Ursache
+Die betroffenen Dateien wurden funktional korrekt implementiert, entsprachen aber nicht vollständig dem konfigurierten Laravel-Pint-Styleguide.
 
-### 2) AuthN/AuthZ
-- `RolesAndPermissionsSeeder` bildet Rollen und Rechte nachvollziehbar ab.
-- `User`-Modell nutzt `HasRoles`.
-- Gleichzeitig fehlen im Stand erkennbare Breeze-/Sanctum-Integrationen und Auth-Flow-Tests.
-
-**Bewertung:** AuthZ-Basis ist vorhanden, AuthN-End-to-End noch nicht umgesetzt.
-
-### 3) Doku-Konsistenz
-- `ROADMAP.md` und `PROGRESS.md` wurden in diesem Review auf den nachweisbaren Stand synchronisiert.
-- `docs/phase1-bootstrap.md` bleibt als Zielbild gültig, enthält aber weiterhin Soll-Schritte, die noch umzusetzen sind.
-
-## Architekturempfehlung (kurzfristig)
-1. **Runtime-Lücke schließen:** vollständige Laravel-Laufzeit in denselben Branch übernehmen.
-2. **Auth abschließen:** Breeze/Sanctum installieren, minimalen Login- und Token-Flow testbar machen.
-3. **Admin-Basis sichtbar machen:** 3–4 Filament-Stammdatenressourcen mit Policies ergänzen.
-4. **Qualitätsgates verbindlich machen:** mindestens `php artisan test`, `pint --test`, `phpstan analyse` im CI-Workflow.
+### Maßnahme
+- Automatische Formatkorrektur über `vendor/bin/pint` durchgeführt.
+- Danach erneute Ausführung aller Quality Gates ohne Fehler.
 
 ## Fazit
-Phase 1 ist **substanziell begonnen**, aber **noch nicht abgeschlossen**. Die strukturell wichtigsten Datenbank- und RBAC-Bausteine sind vorhanden; für „korrekt umgesetzt“ fehlen derzeit Runtime-Nachweis, Auth-Flow und Filament-Basis.
+**Phase 1 ist erfolgreich umgesetzt.**
+
+Die ursprünglichen Review-Lücken (Runtime, Auth-Stack, Filament-Ressourcen, CI-Gates) sind im aktuellen Stand geschlossen. Offene Arbeiten liegen nun primär in den Folgephasen (MVP-Workflows, Finanz-Use-Cases, Audit-Härtung, Reporting).

@@ -22,7 +22,7 @@ TCventory entwickelt sich von einer dokumentierten Basis hin zu einer produktion
   - Audit/Ledger (`inventory_movements`, `audit_events`)
 - Grundlegende Filament-Ressourcen für Stammdaten
 
-**Aktueller Stand (Review):** teilweise umgesetzt. Datenmodell und RBAC-Seeding sind vorbereitet, Runtime-/Paket-Setup, Auth-Flow und Filament-Ressourcen fehlen noch.
+**Aktueller Stand (Review):** abgeschlossen. Runtime, Auth (Breeze/Sanctum), RBAC, Core-Migrationen, Filament-Basisressourcen sowie CI-Gates (Pint/PHPStan/Tests) sind umgesetzt.
 
 ## Phase 2 – Inventory & Catalog MVP
 
