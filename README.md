@@ -18,6 +18,8 @@ Detaillierte fachliche und technische Spezifikation:
 - `PROJECT_OVERVIEW.md`
 - `API_DOCS.md`
 - `ROADMAP.md`
+- `docs/phase1-bootstrap.md`
+- `PROGRESS.md`
 
 ## Installation
 
