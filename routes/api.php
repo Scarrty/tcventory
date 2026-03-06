@@ -27,5 +27,7 @@ Route::prefix('v1')->group(function (): void {
         Route::apiResource('sets', SetController::class)->only(['index', 'store', 'show', 'update']);
         Route::apiResource('products', ProductController::class)->only(['index', 'store', 'show', 'update']);
         Route::apiResource('inventory-items', InventoryItemController::class)->only(['index', 'store', 'show', 'update']);
+        Route::post('inventory-items/{inventory_item}/transfer', [InventoryItemController::class, 'transfer']);
+        Route::post('inventory-items/{inventory_item}/adjust-stock', [InventoryItemController::class, 'adjustStock']);
     });
 });

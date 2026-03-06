@@ -169,6 +169,120 @@ class CatalogInventoryApiTest extends TestCase
         $this->getJson("/api/v1/inventory-items/{$inventoryItem->id}")->assertOk()->assertJsonPath('data.id', $inventoryItem->id);
     }
 
+    public function test_inventory_item_transfer_endpoint_moves_stock_and_creates_movement(): void
+    {
+        $user = $this->authenticateWithPermissions(['inventory.update']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem, $targetLocation] = $this->createInventoryFixture(quantity: 5);
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/transfer", [
+            'quantity' => 3,
+            'target_storage_location_id' => $targetLocation->id,
+            'reason' => 'Relocation',
+            'request_key' => 'transfer-1',
+        ])->assertOk();
+
+        $this->assertDatabaseHas('inventory_items', [
+            'id' => $inventoryItem->id,
+            'quantity' => 2,
+        ]);
+
+        $this->assertDatabaseHas('inventory_items', [
+            'product_id' => $inventoryItem->product_id,
+            'storage_location_id' => $targetLocation->id,
+            'quantity' => 3,
+        ]);
+
+        $this->assertDatabaseHas('inventory_movements', [
+            'inventory_item_id' => $inventoryItem->id,
+            'movement_type' => 'transfer',
+            'quantity_delta' => -3,
+            'to_storage_location_id' => $targetLocation->id,
+        ]);
+    }
+
+    public function test_transfer_endpoint_rejects_when_quantity_would_go_negative(): void
+    {
+        $user = $this->authenticateWithPermissions(['inventory.update']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem, $targetLocation] = $this->createInventoryFixture(quantity: 1);
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/transfer", [
+            'quantity' => 2,
+            'target_storage_location_id' => $targetLocation->id,
+        ])->assertUnprocessable()->assertJsonValidationErrors(['quantity']);
+
+        $this->assertDatabaseMissing('inventory_movements', [
+            'inventory_item_id' => $inventoryItem->id,
+            'movement_type' => 'transfer',
+        ]);
+    }
+
+    public function test_adjust_stock_endpoint_updates_quantity_and_is_idempotent_with_request_key(): void
+    {
+        $user = $this->authenticateWithPermissions(['inventory.update']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem] = $this->createInventoryFixture(quantity: 4);
+
+        $payload = [
+            'quantity_delta' => -2,
+            'reason' => 'Manual correction',
+            'request_key' => 'adjust-1',
+        ];
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/adjust-stock", $payload)->assertOk();
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/adjust-stock", $payload)->assertOk();
+
+        $this->assertDatabaseHas('inventory_items', [
+            'id' => $inventoryItem->id,
+            'quantity' => 2,
+        ]);
+
+        $this->assertSame(1, \App\Models\InventoryMovement::query()->where('movement_type', 'adjustment')->count());
+    }
+
+    public function test_adjust_stock_endpoint_rejects_negative_resulting_stock(): void
+    {
+        $user = $this->authenticateWithPermissions(['inventory.update']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem] = $this->createInventoryFixture(quantity: 1);
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/adjust-stock", [
+            'quantity_delta' => -10,
+            'reason' => 'Too much deduction',
+        ])->assertUnprocessable()->assertJsonValidationErrors(['quantity_delta']);
+    }
+
+    /**
+     * @return array{0: InventoryItem, 1: StorageLocation}
+     */
+    private function createInventoryFixture(int $quantity): array
+    {
+        $game = Game::query()->create(['name' => 'Pokemon', 'slug' => 'pokemon-fixture']);
+        $product = Product::query()->create([
+            'game_id' => $game->id,
+            'name' => 'Booster Box',
+            'product_type' => 'sealed',
+            'is_sealed' => true,
+        ]);
+
+        $sourceLocation = StorageLocation::query()->create(['name' => 'Source', 'type' => 'shelf']);
+        $targetLocation = StorageLocation::query()->create(['name' => 'Target', 'type' => 'shelf']);
+
+        $inventoryItem = InventoryItem::query()->create([
+            'product_id' => $product->id,
+            'storage_location_id' => $sourceLocation->id,
+            'quantity' => $quantity,
+            'condition' => 'near_mint',
+        ]);
+
+        return [$inventoryItem, $targetLocation];
+    }
+
     /**
      * @param  list<string>  $permissions
      */

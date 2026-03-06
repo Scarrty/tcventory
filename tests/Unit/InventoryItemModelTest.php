@@ -21,7 +21,7 @@ class InventoryItemModelTest extends TestCase
 
     public function test_inventory_item_has_expected_casts(): void
     {
-        $casts = (new InventoryItem())->getCasts();
+        $casts = (new InventoryItem)->getCasts();
 
         $this->assertSame('datetime', $casts['acquired_at']);
         $this->assertSame('integer', $casts['quantity']);
@@ -29,7 +29,7 @@ class InventoryItemModelTest extends TestCase
 
     public function test_inventory_item_relations_are_configured_correctly(): void
     {
-        $inventoryItem = new InventoryItem();
+        $inventoryItem = new InventoryItem;
 
         $this->assertInstanceOf(BelongsTo::class, $inventoryItem->product());
         $this->assertInstanceOf(BelongsTo::class, $inventoryItem->storageLocation());
@@ -39,8 +39,8 @@ class InventoryItemModelTest extends TestCase
 
     public function test_product_and_storage_location_have_inventory_items_relations(): void
     {
-        $this->assertInstanceOf(HasMany::class, (new Product())->inventoryItems());
-        $this->assertInstanceOf(HasMany::class, (new StorageLocation())->inventoryItems());
+        $this->assertInstanceOf(HasMany::class, (new Product)->inventoryItems());
+        $this->assertInstanceOf(HasMany::class, (new StorageLocation)->inventoryItems());
     }
 
     public function test_inventory_item_belongs_to_product_and_storage_location(): void
