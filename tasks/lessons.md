@@ -5,3 +5,4 @@
 - 2026-03-12: If the user asks to resolve PR conflicts, avoid broad unrelated doc churn; keep the fix minimal and scoped to conflict-causing files.
 - 2026-03-12: If I start using `exec_command` with `apply_patch` and the user warns, immediately switch to direct file edits (e.g., heredoc/python) for all subsequent patches in the turn.
 - 2026-03-12: When policy/tooling warns about patch method, immediately switch to direct file editing and avoid repeating the blocked method in the same run.
+- 2026-03-12: After a user asks to retry a blocked external action (e.g., release publish), re-check live tooling/auth/remote state first and avoid relying on stale blocker assumptions from a prior run.

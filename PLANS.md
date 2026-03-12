@@ -792,3 +792,152 @@ Before this plan can move from `in_progress` to `completed`:
 
 - Mutating endpoints inventory from `routes/api.php` confirms catalog/inventory CRUD write surfaces remain in scope (`games`, `sets`, `products`, `inventory-items` with store/update/destroy).
 - Existing audit integration currently appears in finance controllers and inventory transfer/adjust services, establishing reuse baseline for the next implementation slice.
+
+## PLAN-2026-03-12-GITHUB-RELEASE-V0.1.1 — Release Preparation and Publication Attempt
+
+- **Status:** `completed`
+- **Owner:** Codex release run
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- Repository currently has release artifacts for `v0.1.0` (`docs/releases/2026-03-06-v0.1.0.md` + checklist).
+- `CHANGELOG.md` contains an `Unreleased` section describing documentation consolidation updates suitable for the next patch release.
+- Local environment lacks GitHub CLI (`gh`) and has no configured git remote/auth context, so direct GitHub release publication may be blocked.
+
+### 2) Objectives
+
+1. Cut patch release `v0.1.1` from current `Unreleased` changelog scope.
+2. Create required release artifacts per `docs/releases/README.md`.
+3. Attempt GitHub publication and capture evidence/limitations.
+
+### 3) Non-Objectives
+
+- No application code changes.
+- No deployment pipeline modifications.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Release Documentation Finalization
+- Add `docs/releases/2026-03-12-v0.1.1.md` release notes.
+- Add `docs/releases/2026-03-12-release-checklist.md` checklist.
+- Promote `CHANGELOG.md` `Unreleased` entries into `[0.1.1] - 2026-03-12`.
+
+#### WS2 — Publication Attempt + Evidence
+- Create local annotated git tag `v0.1.1`.
+- Attempt GitHub release creation using available tooling.
+- Record command outcomes and blockers.
+
+### 5) Verification Evidence Requirements
+
+1. `git diff -- docs/releases CHANGELOG.md PLANS.md` reflects expected release artifacts + planning evidence.
+2. `git tag -n | rg "v0.1.1"` confirms local tag creation.
+3. Release publication command attempted with outcome captured.
+
+### 6) Risks and Mitigations
+
+- **Risk:** Missing GitHub CLI/auth/remote prevents publication.
+  - **Mitigation:** capture explicit blocker evidence and provide exact follow-up commands for a connected environment.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Release docs/checklist/changelog are finalized for `v0.1.1`.
+2. Local release tag exists.
+3. GitHub publication attempt evidence is documented, including blocker if applicable.
+
+### 8) Decision Log
+
+- **2026-03-12:** Proceed with a documentation-and-tag release cut first; treat GitHub publication as best-effort based on environment capability.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Capture release prerequisites (tags/remotes/tooling).
+- [x] Create release docs and changelog promotion for `v0.1.1`.
+- [x] Create local release tag.
+- [x] Attempt GitHub release publication and log evidence.
+
+### 10) Verification Evidence (Current Run)
+
+- `git tag --list | tail -n 20` ✅ (no existing semantic release tags beyond prior docs baseline)
+- `gh --version` ❌ (`gh` command not found in this environment)
+- `git remote -v` ⚠️ (no remotes configured)
+- `git tag -a v0.1.1 -m "Release v0.1.1"` ✅
+- `git tag -n | rg "v0.1.1"` ✅
+- `git remote -v` ⚠️ (no remote configured, cannot push tag to GitHub from this checkout)
+- `gh release create v0.1.1 --title "v0.1.1" --notes-file docs/releases/2026-03-12-v0.1.1.md` ❌ (`gh` command not found in this environment)
+
+
+## PLAN-2026-03-12-GITHUB-RELEASE-V0.1.1-RERUN — Release Publication Retry
+
+- **Status:** `completed`
+- **Owner:** Codex release rerun
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- Previous run prepared release artifacts and local tag `v0.1.1`.
+- User requested a direct retry to create the GitHub release.
+- Current environment now has `gh` installed, but repository still has no git remote and no authenticated GitHub session.
+
+### 2) Objectives
+
+1. Re-attempt creating GitHub release `v0.1.1` using available tooling.
+2. Verify whether release publication can succeed in current environment.
+3. Record exact blockers and next executable command path.
+
+### 3) Non-Objectives
+
+- No new version cut.
+- No application-code or release-notes content changes unless required by retry evidence.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Capability Revalidation
+- Verify `gh` binary availability and auth state.
+- Verify remote configuration and repository target context.
+
+#### WS2 — Publication Attempt + Verification
+- Execute `gh release create v0.1.1 ...` retry.
+- Verify release visibility via `gh release view` / API if possible.
+
+#### WS3 — Evidence and Follow-up
+- Record command outcomes in plan evidence.
+- Document exact setup commands required to complete publication once remote/auth are available.
+
+### 5) Verification Evidence Requirements
+
+1. `gh --version` and `gh auth status` output recorded.
+2. `git remote -v` output recorded.
+3. `gh release create ...` retry command executed with outcome.
+
+### 6) Risks and Mitigations
+
+- **Risk:** missing auth or remote prevents publication despite installed CLI.
+  - **Mitigation:** provide explicit minimal setup sequence (`git remote add`, `gh auth login`, `git push tag`, `gh release create`).
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Release retry has been attempted from this environment.
+2. Success confirmed, or blockers conclusively evidenced.
+3. Follow-up steps are documented and actionable.
+
+### 8) Decision Log
+
+- **2026-03-12:** Retry in-place instead of recutting artifacts since `v0.1.1` tag+docs already exist.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Re-check CLI/tooling/auth/remote prerequisites.
+- [x] Retry GitHub release creation.
+- [x] Verify published release or capture blocker evidence.
+
+### 10) Verification Evidence (Current Run)
+
+- `gh --version` ✅ (`gh version 2.88.1`)
+- `gh auth status -h github.com` ❌ (not logged in)
+- `git remote -v` ⚠️ (no remotes configured)
+- `gh release create v0.1.1 --title "v0.1.1" --notes-file docs/releases/2026-03-12-v0.1.1.md` ❌ (blocked: unauthenticated GitHub CLI session)
+- `gh release view v0.1.1` ❌ (blocked: unauthenticated GitHub CLI session)
+- `git tag -a v0.1.1 -m "Release v0.1.1"` ✅
+- `git tag -n | rg "v0.1.1"` ✅
+
