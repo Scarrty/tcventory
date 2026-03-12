@@ -12,10 +12,14 @@ Das Format orientiert sich an *Keep a Changelog* und verwendet semantische Versi
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-03-12
+
 ### Added
 
 - Dokumentationsstruktur konsolidiert: zentrale Landkarte (`docs/README.md`), Review-Snapshots unter `docs/reviews/`, Release-Prozessdoku (`docs/releases/README.md`).
 - Klare Dokumentgrenzen zwischen `VISION.md`, `PROJECT_OVERVIEW.md`, `ROADMAP.md`, `PROGRESS.md`, `spec.md` und `docs/technische-spezifikation.md` ergänzt.
+- Release-Checklist für den 2026-03-12 Lauf ergänzt (`docs/releases/2026-03-12-release-checklist.md`).
+- Release-Notes für `v0.1.1` ergänzt (`docs/releases/2026-03-12-v0.1.1.md`).
 
 ### Changed
 
