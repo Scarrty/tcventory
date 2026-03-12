@@ -16,6 +16,102 @@ Each plan entry in this file uses the following structure:
 
 ---
 
+## PLAN-2026-03-12-DOC-SYNC — Documentation Structure Alignment (README-anchored)
+
+- **Status:** `completed`
+- **Owner:** Codex documentation maintenance pass
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- `README.md` defines the current onboarding narrative and expected reading flow.
+- `docs/README.md` defines documentation authority boundaries (especially: `PROGRESS.md` as live status source).
+- Existing completed implementation plans in this file indicate a project state ahead of the currently published 2026-03-06 status wording in several top-level docs.
+
+### 2) Objectives
+
+1. Expand planning artifacts so documentation maintenance itself is tracked with the same rigor as code work.
+2. Preserve the existing documentation structure (`README.md` → `docs/README.md` map) while capturing current implementation reality from completed plans.
+3. Provide a clean handoff checklist for synchronizing `README.md`, `PROGRESS.md`, and `ROADMAP.md` with the latest completed delivery phases.
+
+### 3) Non-Objectives
+
+- No rewrite of documentation architecture or ownership model.
+- No speculative future-scope expansion beyond already completed implementation evidence.
+- No API/runtime code changes.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Baseline Reconciliation
+
+- Cross-check status statements between `README.md`, `docs/README.md`, and existing completed plans in `PLANS.md`.
+- Identify where live status text lags behind completed implementation work.
+
+**Deliverables**
+- Documented discrepancy list in this plan's execution checklist.
+
+#### WS2 — PLANS.md Expansion for Documentation Governance
+
+- Add a dedicated plan entry for documentation alignment work, using canonical schema.
+- Record current project status snapshot inferred from completed plans (Phase 3 completion and scoped Phase 4 finance audit-chain implementation).
+
+**Deliverables**
+- This plan entry with clear objectives, risks, and verification evidence.
+
+#### WS3 — Status/Progress Synchronization Backlog
+
+- Define next concrete update targets so status documents can be refreshed without changing their role boundaries.
+
+**Deliverables**
+- Explicit follow-up tasks for:
+  - `README.md` “Aktueller Stand” section,
+  - `PROGRESS.md` phase percentages/work packages,
+  - `ROADMAP.md` phase descriptions for completed Phase-3 and partial Phase-4 scope.
+
+### 5) Verification Evidence Requirements
+
+Before this plan can be considered complete:
+
+1. `PLANS.md` includes this expanded, schema-compliant documentation-alignment entry.
+2. Status statements are backed by already completed plans in this file (no contradiction).
+3. A clean follow-up checklist for status docs is present and actionable.
+
+### 6) Risks and Mitigations
+
+- **Risk:** Overwriting documentation boundaries by duplicating full status docs inside plans.
+  - **Mitigation:** keep this plan focused on orchestration and evidence; retain canonical ownership in `README.md`/`PROGRESS.md`/`ROADMAP.md`.
+- **Risk:** Status drift returns after future implementation passes.
+  - **Mitigation:** require a documentation-sync checklist item in future phase-completion plans.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Documentation-sync work is explicitly represented in `PLANS.md`.
+2. Current implementation reality is captured in planning context without changing doc-role structure.
+3. Follow-up actions are clearly listed for authoritative status documents.
+
+### 8) Decision Log
+
+- **2026-03-12:** Kept documentation structure unchanged and expanded `PLANS.md` instead, because user requested retention of current documentation architecture.
+- **2026-03-12:** Treated completed plans as authoritative evidence of current implementation maturity for planning updates.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Reviewed `README.md` documentation flow and current status wording.
+- [x] Reviewed `docs/README.md` authority boundaries and lifecycle rules.
+- [x] Reconciled project implementation status using completed plan entries in `PLANS.md`.
+- [x] Added dedicated documentation-alignment plan entry using canonical schema.
+- [x] Captured actionable follow-up synchronization targets for status documents.
+
+### 10) Follow-up Synchronization Targets (Authoritative Docs)
+
+1. Update `README.md` “Aktueller Stand” to reflect:
+   - Phase 3 completion,
+   - Phase 4 core finance write-flow audit hash-chain implementation status.
+2. Update `PROGRESS.md` percentages/work packages to align with completed Phase-3 and Phase-4 slices.
+3. Update `ROADMAP.md` Phase 3/4 descriptions so planned-vs-done boundaries remain accurate.
+
+---
+
 ## PLAN-2026-03-12-PHASE4-IMPLEMENTATION — Phase 4 Audit Hash Chain (Core Finance Write Flows)
 
 - **Status:** `completed`
