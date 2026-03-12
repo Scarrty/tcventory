@@ -65,11 +65,6 @@ class FinanceReportController extends Controller
             'breakdown' => [
                 'by_channel' => $filters['groupBy'] === 'channel' ? $this->channelBreakdown($filters['from'], $filters['to']) : [],
             ],
-            // backward compatible aliases
-            'purchase_total' => round($purchaseTotal, 2),
-            'sale_net_total' => round($saleNetTotal, 2),
-            'realized_profit_loss' => round($realizedProfitLoss, 2),
-            'latest_inventory_valuation' => round($latestValuationTotal, 2),
         ];
 
         return response()->json(['data' => $response]);

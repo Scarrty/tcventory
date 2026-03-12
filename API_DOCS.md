@@ -57,7 +57,7 @@ Query-Parameter:
 - `channel` (optional)
 - `group_by`: `none | channel`
 
-Wesentliche KPIs:
+Wesentliche KPIs (unter `data.kpis`):
 
 - `purchase_total`
 - `sale_gross_total`
@@ -68,7 +68,7 @@ Wesentliche KPIs:
 - `fee_burden_total`
 - `tax_burden_total`
 
-Bei `group_by=channel` wird ein Channel-Breakdown unter `breakdown.by_channel` geliefert.
+Bei `group_by=channel` wird ein Channel-Breakdown unter `data.breakdown.by_channel` geliefert.
 
 ## 4. Typische Fehlercodes
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\InteractsWithApiPagination;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreValuationRequest;
 use App\Models\Valuation;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 class ValuationController extends Controller
 {
+    use InteractsWithApiPagination;
+
     public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(Valuation::class, 'valuation');
@@ -21,14 +24,9 @@ class ValuationController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->integer('per_page', 15);
-        $valuations = Valuation::query()->with('inventoryItem')->latest('valued_at')->paginate(max(1, min($perPage, 100)));
+        $valuations = Valuation::query()->with('inventoryItem')->latest('valued_at')->paginate($this->resolvePerPage($request));
 
-        return response()->json(['data' => $valuations->items(), 'meta' => [
-            'current_page' => $valuations->currentPage(),
-            'per_page' => $valuations->perPage(),
-            'total' => $valuations->total(),
-        ]]);
+        return $this->paginatedResponse($valuations);
     }
 
     public function store(StoreValuationRequest $request): JsonResponse

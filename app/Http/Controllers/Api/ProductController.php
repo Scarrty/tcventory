@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\InteractsWithApiPagination;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreProductRequest;
 use App\Http\Requests\Api\UpdateProductRequest;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 
 class ProductController extends Controller
 {
+    use InteractsWithApiPagination;
+
     public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(Product::class, 'product');
@@ -23,17 +26,9 @@ class ProductController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->integer('per_page', 15);
-        $products = Product::query()->with(['game', 'set'])->latest('id')->paginate(max(1, min($perPage, 100)));
+        $products = Product::query()->with(['game', 'set'])->latest('id')->paginate($this->resolvePerPage($request));
 
-        return response()->json([
-            'data' => $products->items(),
-            'meta' => [
-                'current_page' => $products->currentPage(),
-                'per_page' => $products->perPage(),
-                'total' => $products->total(),
-            ],
-        ]);
+        return $this->paginatedResponse($products);
     }
 
     public function store(StoreProductRequest $request): JsonResponse

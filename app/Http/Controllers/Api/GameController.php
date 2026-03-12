@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\InteractsWithApiPagination;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreGameRequest;
 use App\Http\Requests\Api\UpdateGameRequest;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 
 class GameController extends Controller
 {
+    use InteractsWithApiPagination;
+
     public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(Game::class, 'game');
@@ -23,17 +26,9 @@ class GameController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->integer('per_page', 15);
-        $games = Game::query()->latest('id')->paginate(max(1, min($perPage, 100)));
+        $games = Game::query()->latest('id')->paginate($this->resolvePerPage($request));
 
-        return response()->json([
-            'data' => $games->items(),
-            'meta' => [
-                'current_page' => $games->currentPage(),
-                'per_page' => $games->perPage(),
-                'total' => $games->total(),
-            ],
-        ]);
+        return $this->paginatedResponse($games);
     }
 
     public function store(StoreGameRequest $request): JsonResponse

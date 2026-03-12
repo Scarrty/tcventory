@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\InteractsWithApiPagination;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreSetRequest;
 use App\Http\Requests\Api\UpdateSetRequest;
@@ -16,6 +17,8 @@ use Illuminate\Support\Facades\DB;
 
 class SetController extends Controller
 {
+    use InteractsWithApiPagination;
+
     public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(Set::class, 'set');
@@ -23,17 +26,9 @@ class SetController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->integer('per_page', 15);
-        $sets = Set::query()->with('game')->latest('id')->paginate(max(1, min($perPage, 100)));
+        $sets = Set::query()->with('game')->latest('id')->paginate($this->resolvePerPage($request));
 
-        return response()->json([
-            'data' => $sets->items(),
-            'meta' => [
-                'current_page' => $sets->currentPage(),
-                'per_page' => $sets->perPage(),
-                'total' => $sets->total(),
-            ],
-        ]);
+        return $this->paginatedResponse($sets);
     }
 
     public function store(StoreSetRequest $request): JsonResponse

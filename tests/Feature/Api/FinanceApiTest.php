@@ -76,10 +76,10 @@ class FinanceApiTest extends TestCase
 
         $this->getJson('/api/v1/reports/finance-summary')
             ->assertOk()
-            ->assertJsonPath('data.purchase_total', 23)
-            ->assertJsonPath('data.sale_net_total', 26)
-            ->assertJsonPath('data.realized_profit_loss', 3)
-            ->assertJsonPath('data.latest_inventory_valuation', 28)
+            ->assertJsonPath('data.kpis.purchase_total', 23)
+            ->assertJsonPath('data.kpis.sale_net_total', 26)
+            ->assertJsonPath('data.kpis.realized_profit_loss', 3)
+            ->assertJsonPath('data.kpis.latest_inventory_valuation', 28)
             ->assertJsonPath('data.kpis.sale_gross_total', 30)
             ->assertJsonPath('data.kpis.fee_burden_total', 3)
             ->assertJsonPath('data.kpis.unrealized_profit_loss', 5);
