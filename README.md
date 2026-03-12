@@ -1,34 +1,28 @@
 # TCventory (Laravel 12)
 
-
 ## Dokumentationsstatus
 
-- Stand: 2026-03-06
-- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+- Stand: 2026-03-12
+- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf den aktuellen Implementierungsstand synchronisiert.
 
-Dieses Repository enthält ein vollständiges Laravel-12-Projektgerüst mit migrierten, projektspezifischen TCventory-Dateien.
+TCventory ist eine API- und Backoffice-Anwendung für TCG-Katalog, Inventar und Finanzprozesse.
 
 ## Aktueller Stand
 
 - **Phase 0/1:** abgeschlossen (Plattform, Auth, RBAC, Migrationen, Filament-Basis)
-- **Phase 2:** weitgehend umgesetzt (API-CRUD für Katalog/Inventar inkl. Delete, Transfer, Stock-Adjust)
-- **Phase 3:** teilweise umgesetzt (Purchases, Sales, Valuations, Finance Summary)
-- **Phase 4/5:** vorbereitet bzw. geplant (Audit-Hash-Chain, erweiterte Reports, Integrationen)
+- **Phase 2:** abgeschlossen (Katalog/Inventar-CRUD inkl. Transfer und Stock-Adjust)
+- **Phase 3:** abgeschlossen (Purchases, Sales, Valuations, erweitertes Finance Summary Reporting)
+- **Phase 4:** gestartet (Audit-Hash-Chain für Finance-Write-Flows inkl. Verifikationskommando)
+- **Phase 5:** geplant (Skalierung/Integrationen)
 
-Siehe auch: `docs/README.md` (Dokumentationslandkarte), `ROADMAP.md`, `PROGRESS.md`.
+Siehe: `docs/README.md` (Dokumentationslandkarte), `ROADMAP.md` (Plan), `PROGRESS.md` (Live-Ist).
 
 ## Dokumentation (Lesepfade)
-
-Für klare Zuständigkeiten zwischen den Doku-Dateien siehe die zentrale Dokumentationslandkarte:
-
-- `docs/README.md`
-
-Empfohlener Einstieg:
 
 1. `README.md` (Quickstart)
 2. `PROJECT_OVERVIEW.md` (Architektur & Scope)
 3. `API_DOCS.md` (API-Kontrakte)
-4. `ROADMAP.md` + `PROGRESS.md` (Plan vs. Ist)
+4. `ROADMAP.md` + `PROGRESS.md` (Soll vs. Ist)
 
 Spezifikationen nach Zielgruppe:
 
@@ -40,11 +34,11 @@ Spezifikationen nach Zielgruppe:
 - API v1 unter `/api/v1`
 - Health-Endpoint: `GET /api/v1/health`
 - Katalog-CRUD: `games`, `sets`, `products`
-- Inventar-CRUD: `inventory-items`
-- Inventar-Aktionen: `transfer`, `adjust-stock`
+- Inventar-CRUD + Aktionen: `inventory-items`, `transfer`, `adjust-stock`
 - Finance-Module: `purchases`, `sales`, `valuations`
-- Finance-Report: `GET /api/v1/reports/finance-summary`
+- Finance-Report: `GET /api/v1/reports/finance-summary` (periodisiert, channel-filterbar, KPI-Breakdown)
 - Token-basierte API-Authentifizierung via Sanctum (`POST /api/v1/tokens`, `GET /api/v1/me`)
+- Audit-Integrität: `php artisan audit:verify-chain`
 
 ## Voraussetzungen
 
@@ -101,12 +95,6 @@ cp .env.docker.example .env.docker
 IMAGE_TAG=latest docker compose --env-file .env.docker pull
 IMAGE_TAG=latest docker compose --env-file .env.docker up -d
 ```
-
-Empfehlung für Produktion:
-
-- release-spezifischen Tag nutzen (`IMAGE_TAG=vX.Y.Z`)
-- nach Deploy Migrationen ausführen
-- Release-Artefakte und Rollback-Hinweise nutzen
 
 Details: `docs/deployment/docker-compose-v2.md`.
 

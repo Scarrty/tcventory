@@ -1,17 +1,16 @@
 # PROJECT_OVERVIEW
 
-
 ## Dokumentationsstatus
 
-- Stand: 2026-03-06
-- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+- Stand: 2026-03-12
+- Architekturüberblick auf den aktuellen Repository-Stand synchronisiert.
 
 ## 0. Dokumentgrenzen
 
 - **Dieses Dokument** beschreibt Architektur, technische Module und nicht-funktionale Anforderungen.
-- Produktvision und Zielgruppen stehen in `VISION.md`.
-- Roadmap/Meilensteine stehen in `ROADMAP.md`.
-- Live-Fortschritt steht in `PROGRESS.md`.
+- Produktvision: `VISION.md`
+- Lieferplanung: `ROADMAP.md`
+- Live-Fortschritt: `PROGRESS.md`
 
 ## 1. Ziel und Scope
 
@@ -22,7 +21,7 @@ Kernziele:
 - strukturierte Inventarisierung und Katalogisierung
 - wirtschaftliches Tracking (Einkauf, Wertentwicklung, Verkauf, Gebühren)
 - Zustands- und Grading-Verwaltung auf Einzelobjekt-Ebene
-- revisionssichere Historisierung von Bestandsänderungen
+- revisionsnahe Historisierung kritischer Finanz- und Bestandsänderungen
 
 ## 2. Plattform und Tech Stack
 
@@ -30,7 +29,6 @@ Kernziele:
 
 - PHP 8.4+
 - Laravel 12
-- Composer
 - Eloquent ORM
 
 ### Frontend
@@ -43,108 +41,90 @@ Kernziele:
 
 ### Datenhaltung und Infrastruktur
 
-- PostgreSQL
-- Redis (Cache/Queue/Locks)
-- Laravel Horizon (Queue Monitoring)
-- Meilisearch (optional)
-- Sentry (Monitoring)
+- PostgreSQL (empfohlen)
+- SQLite (lokal/minimal)
+- Redis (optional)
+- Docker Compose Setups für Betrieb/Entwicklung
 
 ### Build- und Entwickler-Tooling
 
 - Node.js + Vite
-- Pest + PHPUnit
-- PHPStan + Laravel Pint + Rector
+- PHPUnit via `php artisan test`
+- PHPStan + Laravel Pint
 
 ## 3. Architektur
 
-Die Anwendung folgt einer modularen, schichtenorientierten Architektur.
+Die Anwendung folgt einer schichtenorientierten Laravel-Struktur mit Services für transaktionale Use-Cases.
 
 ### 3.1 Presentation Layer
 
-- Filament Panels für Backoffice-Flows
-- Livewire-Komponenten für interaktive Prozesse
-- Blade/Tailwind/Alpine für UI
+- Filament-Panel für Backoffice-Flows
+- Blade/Livewire/Alpine/Tailwind für UI
+- API-Endpunkte unter `routes/api.php`
 
 ### 3.2 Application Layer
 
-- Use-Case-Services (z. B. Inventory, Valuation, Sales)
-- Action-/Command-Klassen für transaktionale Prozesse
-- Policies für Autorisierung
+- Controller + FormRequests für API-Kontrakte
+- Domänennahe Services für Lösch-, Transfer-, Adjust- und Audit-Flows
+- Policies/RBAC für Autorisierung
 
 ### 3.3 Domain Layer
 
-- Eloquent-Modelle als Domänen-Aggregate
-- Value Objects für Zustände/Preiswerte
-- Domänenregeln für Bestand, Bewertung, Gebühren und Audit-Events
+- Eloquent-Modelle als Domänenentitäten
+- Geschäftsregeln für Bestand, Transaktionen und Reporting
+- Idempotenz (`request_key`) für kritische Finance- und Inventory-Write-Flows
 
 ### 3.4 Infrastructure Layer
 
-- relationale DB für persistente Daten
-- Redis + Queue Worker + Horizon für asynchrone Aufgaben
-- optional Suchindex über Meilisearch
-- Observability über Sentry und Logging
+- Relationale Datenbank inkl. Audit-/Ledger-Tabellen
+- Artisan-Kommandos für Betriebs-/Integritätschecks (z. B. Audit-Chain-Verifikation)
+- Optionaler Ausbau für Queue/Monitoring
 
 ## 4. Kernmodule
 
-1. **Catalog Module**
-   - Games, Sets, Produkte
-   - Importmöglichkeiten (CSV/API)
-2. **Inventory Module**
-   - Bestand, Lagerorte, Zustände, Grading
-   - Transfers/Bestandsanpassungen
-3. **Finance Module**
-   - Einkauf/Verkauf, Gebühren, Marge
-   - Bewertungsverlauf
-4. **Audit Module**
-   - unveränderliche Ereignishistorie
-   - Nachvollziehbarkeit von Bestandsänderungen
-5. **Reporting Module**
-   - Bestandswert, Umschlag, P/L
-6. **Search Module (optional)**
-   - Volltext und facettierte Filter
+1. **Catalog Module** (`games`, `sets`, `products`)
+2. **Inventory Module** (`storage_locations`, `inventory_items`, Transfers/Korrekturen)
+3. **Finance Module** (`purchases`, `sales`, `valuations`, finance summary report)
+4. **Audit Module** (verkettete Audit-Events für kritische Finance-Write-Flows)
+5. **Reporting Module** (KPIs + channel/period Filter im Finance Summary)
 
 ## 5. Datenmodell (Überblick)
 
 Zentrale Entitäten:
 
-- `users`, Rollen/Berechtigungen
-- `tcg_games`, `sets`, `products`
-- `inventory_items`, `storage_locations`
-- `purchases`, `purchase_lines`
-- `sales`, `sale_lines`
+- `users` + Rollen/Berechtigungen
+- `games`, `sets`, `products`
+- `storage_locations`, `inventory_items`, `inventory_movements`
+- `purchases`, `purchase_items`
+- `sales`, `sale_items`
 - `valuations`
-- `inventory_movements`
 - `audit_events`
 
-Audit-Prinzip:
+Audit-Prinzip (Phase-4-Einstieg):
 
-1. fachliche Änderung
-2. Ledger-Bewegung (`inventory_movements`)
-3. append-only Audit-Event mit Hash-Verkettung
+1. fachliche Write-Operation
+2. transaktionaler Abschluss
+3. append-only Audit-Event mit `previous_hash` → `event_hash`
 
 ## 6. Nicht-funktionale Anforderungen
 
-- **Auditierbarkeit** durch unveränderliche Ereignisse
-- **Konsistenz** via transaktionale Kernprozesse
-- **Performance** (u. a. asynchrone Bulk-/Repricing-Prozesse)
-- **Sicherheit** (RBAC, Framework-Schutzmechanismen)
-- **Skalierbarkeit** (horizontale Web-/Worker-Skalierung)
+- **Auditierbarkeit** via verketteter Audit-Events
+- **Konsistenz** über transaktionale Kernprozesse
+- **Sicherheit** via RBAC, Validierung und Framework-Schutz
+- **Wartbarkeit** über tests + statische Analyse + konsistente API-Kontrakte
 
 ## 7. Aktueller Implementierungsstand
 
-Unter `/api/v1` sind aktuell folgende Ressourcen und Funktionen produktiv umgesetzt:
+Unter `/api/v1` sind produktiv umgesetzt:
 
-- Health und Zugang:
-  - `GET /api/v1/health`
-  - `POST /api/v1/tokens`
-  - `GET /api/v1/me`
-- Katalog-Ressourcen:
-  - `games` (`index`, `store`, `show`, `update`, `destroy`)
-  - `sets` (`index`, `store`, `show`, `update`, `destroy`)
-  - `products` (`index`, `store`, `show`, `update`, `destroy`)
-- Inventar-Ressourcen:
-  - `inventory-items` (`index`, `store`, `show`, `update`, `destroy`)
-  - `POST /api/v1/inventory-items/{id}/transfer` (Umlagerung/Teilumlagerung)
-  - `POST /api/v1/inventory-items/{id}/adjust-stock` (Bestandskorrektur +/-)
+- Health/Access: `GET /health`, `POST /tokens`, `GET /me`
+- Catalog API: `games`, `sets`, `products` (index/store/show/update/destroy)
+- Inventory API: `inventory-items` (index/store/show/update/destroy)
+- Inventory Actions: `POST /inventory-items/{inventory_item}/transfer`, `POST /inventory-items/{inventory_item}/adjust-stock`
+- Finance API: `purchases`, `sales`, `valuations` (index/store)
+- Reporting API: `GET /reports/finance-summary` (period/channel/grouping)
 
-Damit ist neben dem reinen CRUD bereits ein wesentlicher Teil der operativen Bestandslogik (Transfer und Korrekturbuchung inkl. Bewegungsprotokollierung) im API-Layer verfügbar.
+Zusätzlich vorhanden:
+
+- Audit-Hash-Chain für Finance-Write-Flows
+- Integritätsprüfung per `php artisan audit:verify-chain`

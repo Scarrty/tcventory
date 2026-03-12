@@ -3,7 +3,7 @@
 
 ## Dokumentationsstatus
 
-- Stand: 2026-03-06
+- Stand: 2026-03-12
 - Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
 
 Alle relevanten Änderungen am Projekt werden in dieser Datei dokumentiert.
@@ -16,6 +16,11 @@ Das Format orientiert sich an *Keep a Changelog* und verwendet semantische Versi
 
 - Dokumentationsstruktur konsolidiert: zentrale Landkarte (`docs/README.md`), Review-Snapshots unter `docs/reviews/`, Release-Prozessdoku (`docs/releases/README.md`).
 - Klare Dokumentgrenzen zwischen `VISION.md`, `PROJECT_OVERVIEW.md`, `ROADMAP.md`, `PROGRESS.md`, `spec.md` und `docs/technische-spezifikation.md` ergänzt.
+
+### Changed
+
+- Aktive Kern-Dokumente (`README.md`, `PROJECT_OVERVIEW.md`, `ROADMAP.md`, `PROGRESS.md`, `API_DOCS.md`, `spec.md`, `docs/projektstruktur.md`) auf den aktuellen Implementierungsstand (Phase 3 abgeschlossen, Phase 4 gestartet) synchronisiert.
+- Veraltete Statusstempel und inkonsistente Struktur-/Phasenbeschreibungen bereinigt.
 
 ## [0.1.0] - 2026-03-06
 
