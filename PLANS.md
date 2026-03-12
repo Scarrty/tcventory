@@ -599,3 +599,107 @@ This plan is done when:
 - `php artisan test tests/Feature/Api/InventoryItemApiTest.php tests/Unit/InventoryServicesTest.php` ✅ (passes with known warning output about missing frontend asset manifest in this CLI environment)
 - `vendor/bin/phpstan analyse --memory-limit=1G` ✅
 - `php artisan audit:verify-chain` ⚠️ (fails outside test harness because `/workspace/tcventory/database/database.sqlite` does not exist in this environment)
+
+## PLAN-2026-03-12-NEXT-STEPS-ORCHESTRATION — Immediate Execution Plan (Post Phase-4 Inventory Audit Expansion)
+
+- **Status:** `completed`
+- **Owner:** Codex implementation pass
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- Core audit hash-chain support is implemented for finance and inventory write flows.
+- Documentation alignment work is completed, but roadmap/progress cadence now depends on selecting the highest-impact next implementation slice.
+- The most likely near-term options are (a) broader write-flow audit coverage beyond current scope and/or (b) operational hardening (monitoring, runbooks, CI-level chain verification).
+
+### 2) Objectives
+
+1. Provide a concrete, low-ambiguity sequence for the next engineering iteration.
+2. Prioritize work that improves correctness guarantees and operational confidence before expanding product surface area.
+3. Define verification gates so the next run can be executed without re-discovery.
+
+### 3) Non-Objectives
+
+- No broad audit rollout across every remaining write path in this run.
+- No refactor of completed Phase-3/Phase-4 domain services.
+- No speculative long-term architecture redesign.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Scope Selection and Baseline Validation
+
+- Reconfirm current behavior for audit event creation on existing finance/inventory write paths.
+- Enumerate uncovered mutating endpoints/services (if any) and rank by compliance/risk impact.
+
+**Deliverables**
+- Ranked backlog of uncovered write flows with recommended implementation order.
+- Quick regression evidence for currently covered flows.
+
+#### WS2 — Operational Hardening Slice
+
+- Define concrete hardening tasks for hash-chain operations (failure visibility, runbook checks, deploy-time verification).
+- Decide minimal CI evidence set for chain integrity and idempotency protections.
+
+**Deliverables**
+- Actionable hardening checklist (CI command set + ownership notes).
+- Proposed threshold for blocking releases on audit-chain failures.
+
+#### WS3 — Documentation/Status Sync Follow-Through
+
+- Update authoritative status documents after WS1/WS2 scope decisions are finalized.
+- Ensure roadmap/progress wording distinguishes completed scope from next-iteration commitments.
+
+**Deliverables**
+- Updated status wording checklist for `README.md`, `PROGRESS.md`, and `ROADMAP.md`.
+
+### 5) Verification Evidence Requirements
+
+Before this plan can move from `draft` to `in_progress`:
+
+1. A selected next implementation target is documented with explicit in-scope endpoints/services.
+2. Verification command set is listed (lint/tests/static analysis + chain verification path).
+3. Risks for the chosen slice are captured with at least one mitigation each.
+
+### 6) Risks and Mitigations
+
+- **Risk:** Expanding scope too broadly and delaying delivery.
+  - **Mitigation:** time-box selection and commit to a single highest-impact slice first.
+- **Risk:** Regressions in existing audited flows while adding coverage.
+  - **Mitigation:** require targeted regression tests for finance + inventory paths in every follow-up PR.
+- **Risk:** Operational blind spots despite functional correctness.
+  - **Mitigation:** include explicit runbook/CI chain-integrity checks in acceptance criteria.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Next engineering slice is selected and decomposed into implementable tasks.
+2. Verification gates are documented and runnable.
+3. Status-doc synchronization tasks are queued with clear ownership.
+
+### 8) Decision Log
+
+- **2026-03-12:** Chose a planning-only entry to unblock immediate prioritization without introducing unvalidated scope changes.
+- **2026-03-12:** Prioritized correctness/operability hardening ahead of broad feature expansion.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Reviewed latest completed plan entries for current-state grounding.
+- [x] Captured immediate next-step workstreams and deliverables.
+- [x] Defined verification prerequisites for activating the next implementation plan.
+- [x] Confirm selected next implementation slice and flip plan status to `in_progress`.
+- [x] Implement selected hardening slice in CI (`audit:verify-chain` gate).
+- [x] Synchronize status docs (`README.md`, `PROGRESS.md`, `ROADMAP.md`).
+- [x] Record verification evidence and close the plan as `completed`.
+
+
+### 10) Implementation Outcome (Current Run)
+
+- **Selected next slice:** WS2 operational hardening first, implemented as a CI release gate that runs `php artisan audit:verify-chain` after migrations/tests.
+- **Scope decision rationale:** this provides immediate operational confidence with minimal delivery risk while preserving momentum for broader audit-coverage expansion in follow-up slices.
+- **Queued follow-up:** expand hash-chain coverage to remaining catalog/inventory CRUD write flows in a dedicated implementation plan.
+
+### 11) Verification Evidence Log (Current Run)
+
+- `composer install --no-interaction --no-progress --prefer-dist` ✅
+- `php artisan test tests/Feature/Api/FinanceApiTest.php tests/Feature/Api/InventoryItemApiTest.php` ✅ (passes with known frontend-manifest warnings in this CLI environment).
+- `php artisan audit:verify-chain` ⚠️ (fails locally because default sqlite file `/workspace/tcventory/database/database.sqlite` is not present; CI gate runs against migrated Postgres service in workflow job).
+- `git diff -- .github/workflows/ci.yml README.md PROGRESS.md ROADMAP.md PLANS.md tasks/lessons.md` ✅
