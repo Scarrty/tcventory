@@ -7,21 +7,28 @@ namespace App\Services\Inventory;
 use App\Models\InventoryItem;
 use App\Models\InventoryMovement;
 use App\Models\StorageLocation;
+use App\Services\Audit\HashChainAuditLogger;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class TransferInventoryItemService
 {
+    public function __construct(private readonly HashChainAuditLogger $auditLogger) {}
+
     public function execute(
         InventoryItem $inventoryItem,
         int $quantity,
         int $targetStorageLocationId,
         ?string $reason = null,
         ?string $requestKey = null,
+        ?Authenticatable $actor = null,
     ): InventoryItem {
-        return DB::transaction(function () use ($inventoryItem, $quantity, $targetStorageLocationId, $reason, $requestKey): InventoryItem {
+        return DB::transaction(function () use ($inventoryItem, $quantity, $targetStorageLocationId, $reason, $requestKey, $actor): InventoryItem {
             /** @var InventoryItem $lockedItem */
             $lockedItem = InventoryItem::query()->lockForUpdate()->findOrFail($inventoryItem->id);
+            $sourceLocationId = $lockedItem->storage_location_id;
+            $sourceQuantityBefore = $lockedItem->quantity;
 
             if ($quantity < 1) {
                 throw ValidationException::withMessages([
@@ -83,7 +90,7 @@ class TransferInventoryItemService
                 'inventory_item_id' => $lockedItem->id,
                 'movement_type' => 'transfer',
                 'quantity_delta' => -$quantity,
-                'from_storage_location_id' => $inventoryItem->storage_location_id,
+                'from_storage_location_id' => $sourceLocationId,
                 'to_storage_location_id' => $targetStorageLocationId,
                 'reason' => $reason,
                 'metadata' => [
@@ -93,6 +100,31 @@ class TransferInventoryItemService
                 ],
                 'occurred_at' => now(),
             ]);
+
+            DB::afterCommit(function () use ($lockedItem, $targetItem, $sourceLocationId, $targetStorageLocationId, $sourceQuantityBefore, $quantity, $reason, $requestKey, $actor): void {
+                $this->auditLogger->log(
+                    eventType: 'inventory.transfer.executed',
+                    auditable: $lockedItem,
+                    changes: [
+                        'inventory_item_id' => $lockedItem->id,
+                        'target_item_id' => $targetItem->id,
+                        'request_key' => $requestKey,
+                        'quantity' => $quantity,
+                        'reason' => $reason,
+                        'from_storage_location_id' => $sourceLocationId,
+                        'to_storage_location_id' => $targetStorageLocationId,
+                        'before' => [
+                            'source_quantity' => $sourceQuantityBefore,
+                        ],
+                        'after' => [
+                            'source_quantity' => max(0, $sourceQuantityBefore - $quantity),
+                            'target_quantity' => $targetItem->fresh()->quantity,
+                        ],
+                    ],
+                    context: ['source' => 'api.v1.inventory.transfer'],
+                    actor: $actor,
+                );
+            });
 
             return InventoryItem::query()->findOrFail($lockedItem->id)->fresh();
         });

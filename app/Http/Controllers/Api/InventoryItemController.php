@@ -85,6 +85,7 @@ class InventoryItemController extends Controller
             $request->integer('target_storage_location_id'),
             $request->string('reason')->toString() !== '' ? $request->string('reason')->toString() : null,
             $request->string('request_key')->toString() !== '' ? $request->string('request_key')->toString() : null,
+            $request->user(),
         );
 
         return response()->json([
@@ -99,6 +100,7 @@ class InventoryItemController extends Controller
             $request->integer('quantity_delta'),
             $request->string('reason')->toString() !== '' ? $request->string('reason')->toString() : null,
             $request->string('request_key')->toString() !== '' ? $request->string('request_key')->toString() : null,
+            $request->user(),
         );
 
         return response()->json([

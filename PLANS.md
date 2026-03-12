@@ -507,3 +507,95 @@ This plan is done when:
 - `git status --short` ✅ (nur geplante Dokumentdateien und `PLANS.md` geändert).
 - `rg -n "Stand: 2026-03-06" README.md PROJECT_OVERVIEW.md ROADMAP.md PROGRESS.md API_DOCS.md spec.md docs/projektstruktur.md CHANGELOG.md` ✅ (keine Treffer).
 - `rg -n "Phase 3|Phase 4|finance-summary|audit:verify-chain" README.md ROADMAP.md PROGRESS.md PROJECT_OVERVIEW.md API_DOCS.md` ✅ (Status- und Featureaussagen konsistent auffindbar).
+
+---
+
+## PLAN-2026-03-12-PHASE4-INVENTORY-AUDIT-EXPANSION — Inventory Write-Flow Audit Chain Coverage
+
+- **Status:** `completed`
+- **Owner:** Codex implementation pass
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- Phase-4 hash-chain auditing is active for finance write flows (`purchases`, `sales`, `valuations`).
+- Critical inventory write flows (`transfer`, `adjust-stock`) were tracked in `inventory_movements` but not yet in `audit_events`.
+- Idempotent request-key handling already exists for both inventory flows and must remain duplicate-safe.
+
+### 2) Objectives
+
+1. Extend hash-chain audit coverage to inventory transfer/adjust write paths.
+2. Preserve idempotent behavior so replayed requests do not create duplicate audit events.
+3. Add feature-level verification proving event types and chain continuity.
+
+### 3) Non-Objectives
+
+- No expansion to catalog write/delete events in this pass.
+- No changes to report endpoints (`inventory-value`, `profit-loss`) in this pass.
+- No redesign of existing hash canonicalization logic.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Service-level Audit Integration
+
+- Inject `HashChainAuditLogger` into inventory services.
+- Emit post-commit audit events for:
+  - `inventory.transfer.executed`
+  - `inventory.stock.adjusted`
+- Include payload fields for actor, request key, quantities, and location deltas.
+
+**Deliverables**
+- Updated `TransferInventoryItemService` + `AdjustInventoryStockService`.
+- Controller wiring to pass authenticated actor to service layer.
+
+#### WS2 — Automated Verification Coverage
+
+- Add feature assertions that inventory transfer + adjustment create deterministic audit events.
+- Verify idempotent replay behavior keeps event cardinality stable.
+- Verify audit hash-chain continuity via `audit:verify-chain` in feature test context.
+
+**Deliverables**
+- Extended `tests/Feature/Api/InventoryItemApiTest.php`.
+
+### 5) Verification Evidence Requirements
+
+1. Formatting/style checks pass for touched PHP files.
+2. Inventory feature and service tests pass with new audit assertions.
+3. Static analysis remains clean.
+4. Any direct CLI `audit:verify-chain` limitation in local env is documented.
+
+### 6) Risks and Mitigations
+
+- **Risk:** Duplicate audit events on idempotent replay.
+  - **Mitigation:** keep early-return behavior before movement creation/audit scheduling.
+- **Risk:** Incorrect source location in transfer metadata.
+  - **Mitigation:** capture source location from locked record before mutation and reuse in movement+audit payload.
+- **Risk:** Post-commit closure reads stale target quantity.
+  - **Mitigation:** fetch fresh target quantity inside closure when building audit payload.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Transfer/adjust API flows emit hash-chain audit events exactly once per unique request.
+2. Added tests validate event types and chain links.
+3. Lint/static analysis and targeted tests are green, with environment warnings explicitly recorded.
+
+### 8) Decision Log
+
+- **2026-03-12:** Prioritized inventory service integration over controller-only hooks to keep audit payload close to domain mutation logic.
+- **2026-03-12:** Chose post-commit logging to mirror finance implementation pattern and avoid phantom audit records.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Add audit logger dependency + event emission in transfer service.
+- [x] Add audit logger dependency + event emission in stock-adjust service.
+- [x] Pass authenticated actor from inventory controller into both services.
+- [x] Add feature test validating inventory audit events + chain continuity + idempotency.
+- [x] Run verification commands and record evidence.
+- [x] Mark plan as completed.
+
+### 10) Verification Evidence Log (Current Run)
+
+- `vendor/bin/pint --test app/Services/Inventory/TransferInventoryItemService.php app/Services/Inventory/AdjustInventoryStockService.php app/Http/Controllers/Api/InventoryItemController.php tests/Feature/Api/InventoryItemApiTest.php` ✅
+- `php artisan test tests/Feature/Api/InventoryItemApiTest.php tests/Unit/InventoryServicesTest.php` ✅ (passes with known warning output about missing frontend asset manifest in this CLI environment)
+- `vendor/bin/phpstan analyse --memory-limit=1G` ✅
+- `php artisan audit:verify-chain` ⚠️ (fails outside test harness because `/workspace/tcventory/database/database.sqlite` does not exist in this environment)
