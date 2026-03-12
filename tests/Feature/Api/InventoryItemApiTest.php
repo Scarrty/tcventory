@@ -48,6 +48,40 @@ class InventoryItemApiTest extends TestCase
             ->assertJsonPath('data.quantity', 5);
     }
 
+    public function test_store_update_and_destroy_emit_audit_chain_events(): void
+    {
+        $user = $this->createUserWithPermissions(['inventory.create', 'inventory.update', 'inventory.delete']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem] = $this->createInventoryFixture(quantity: 3);
+
+        $created = $this->postJson('/api/v1/inventory-items', [
+            'product_id' => $inventoryItem->product_id,
+            'storage_location_id' => $inventoryItem->storage_location_id,
+            'quantity' => 2,
+            'condition' => 'near_mint',
+        ])->assertCreated();
+
+        $id = $created->json('data.id');
+
+        $this->patchJson("/api/v1/inventory-items/{$id}", ['quantity' => 5])->assertOk();
+        $this->deleteJson("/api/v1/inventory-items/{$id}")->assertNoContent();
+
+        $events = AuditEvent::query()->orderBy('id')->get();
+
+        $this->assertSame(
+            ['inventory.item.created', 'inventory.item.updated', 'inventory.item.deleted'],
+            $events->pluck('event_type')->all(),
+        );
+        $this->assertNull($events[0]->previous_hash);
+        $this->assertSame($events[0]->event_hash, $events[1]->previous_hash);
+        $this->assertSame($events[1]->event_hash, $events[2]->previous_hash);
+
+        $this->assertSame(2, $events[0]->changes['after']['quantity']);
+        $this->assertSame(5, $events[1]->changes['after']['quantity']);
+        $this->assertSame(5, $events[2]->changes['before']['quantity']);
+    }
+
     public function test_store_and_update_validate_payloads(): void
     {
         $user = $this->createUserWithPermissions(['inventory.create', 'inventory.update']);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Models\AuditEvent;
 use App\Models\Set;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -45,6 +46,39 @@ class SetApiTest extends TestCase
         $this->patchJson("/api/v1/sets/{$setId}", ['name' => 'Second Chapter Revised'])
             ->assertOk()
             ->assertJsonPath('data.name', 'Second Chapter Revised');
+    }
+
+    public function test_store_update_and_destroy_emit_audit_chain_events(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.create', 'catalog.update', 'catalog.delete']);
+        Sanctum::actingAs($user);
+
+        [$game] = $this->createCatalogFixture();
+
+        $created = $this->postJson('/api/v1/sets', [
+            'game_id' => $game->id,
+            'name' => 'Unlimited',
+            'code' => 'UNL',
+        ])->assertCreated();
+
+        $setId = $created->json('data.id');
+
+        $this->patchJson("/api/v1/sets/{$setId}", ['name' => 'Unlimited Revised'])->assertOk();
+        $this->deleteJson("/api/v1/sets/{$setId}")->assertNoContent();
+
+        $events = AuditEvent::query()->orderBy('id')->get();
+
+        $this->assertSame(
+            ['catalog.set.created', 'catalog.set.updated', 'catalog.set.deleted'],
+            $events->pluck('event_type')->all(),
+        );
+        $this->assertNull($events[0]->previous_hash);
+        $this->assertSame($events[0]->event_hash, $events[1]->previous_hash);
+        $this->assertSame($events[1]->event_hash, $events[2]->previous_hash);
+
+        $this->assertSame('Unlimited', $events[0]->changes['after']['name']);
+        $this->assertSame('Unlimited Revised', $events[1]->changes['after']['name']);
+        $this->assertSame('Unlimited Revised', $events[2]->changes['before']['name']);
     }
 
     public function test_store_and_update_validate_payloads(): void

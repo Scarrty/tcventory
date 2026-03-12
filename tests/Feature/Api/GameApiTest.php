@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Models\AuditEvent;
 use App\Models\Game;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -48,6 +49,36 @@ class GameApiTest extends TestCase
         $this->patchJson("/api/v1/games/{$gameId}", [
             'name' => 'Magic',
         ])->assertOk()->assertJsonPath('data.name', 'Magic');
+    }
+
+    public function test_store_update_and_destroy_emit_audit_chain_events(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.create', 'catalog.update', 'catalog.delete']);
+        Sanctum::actingAs($user);
+
+        $created = $this->postJson('/api/v1/games', [
+            'name' => 'Lorcana',
+            'slug' => 'lorcana',
+        ])->assertCreated();
+
+        $gameId = $created->json('data.id');
+
+        $this->patchJson("/api/v1/games/{$gameId}", ['name' => 'Disney Lorcana'])->assertOk();
+        $this->deleteJson("/api/v1/games/{$gameId}")->assertNoContent();
+
+        $events = AuditEvent::query()->orderBy('id')->get();
+
+        $this->assertSame(
+            ['catalog.game.created', 'catalog.game.updated', 'catalog.game.deleted'],
+            $events->pluck('event_type')->all(),
+        );
+        $this->assertNull($events[0]->previous_hash);
+        $this->assertSame($events[0]->event_hash, $events[1]->previous_hash);
+        $this->assertSame($events[1]->event_hash, $events[2]->previous_hash);
+
+        $this->assertSame('Lorcana', $events[0]->changes['after']['name']);
+        $this->assertSame('Disney Lorcana', $events[1]->changes['after']['name']);
+        $this->assertSame('Disney Lorcana', $events[2]->changes['before']['name']);
     }
 
     public function test_store_and_update_validate_payloads(): void

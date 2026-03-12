@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Models\AuditEvent;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -47,6 +48,40 @@ class ProductApiTest extends TestCase
         $this->patchJson("/api/v1/products/{$productId}", ['rarity' => 'rare'])
             ->assertOk()
             ->assertJsonPath('data.rarity', 'rare');
+    }
+
+    public function test_store_update_and_destroy_emit_audit_chain_events(): void
+    {
+        $user = $this->createUserWithPermissions(['catalog.create', 'catalog.update', 'catalog.delete']);
+        Sanctum::actingAs($user);
+
+        [$game, $set] = $this->createCatalogFixture();
+
+        $created = $this->postJson('/api/v1/products', [
+            'game_id' => $game->id,
+            'set_id' => $set->id,
+            'name' => 'Counterspell',
+            'product_type' => 'single',
+        ])->assertCreated();
+
+        $productId = $created->json('data.id');
+
+        $this->patchJson("/api/v1/products/{$productId}", ['rarity' => 'uncommon'])->assertOk();
+        $this->deleteJson("/api/v1/products/{$productId}")->assertNoContent();
+
+        $events = AuditEvent::query()->orderBy('id')->get();
+
+        $this->assertSame(
+            ['catalog.product.created', 'catalog.product.updated', 'catalog.product.deleted'],
+            $events->pluck('event_type')->all(),
+        );
+        $this->assertNull($events[0]->previous_hash);
+        $this->assertSame($events[0]->event_hash, $events[1]->previous_hash);
+        $this->assertSame($events[1]->event_hash, $events[2]->previous_hash);
+
+        $this->assertSame('Counterspell', $events[0]->changes['after']['name']);
+        $this->assertSame('uncommon', $events[1]->changes['after']['rarity']);
+        $this->assertSame('Counterspell', $events[2]->changes['before']['name']);
     }
 
     public function test_store_and_update_validate_payloads(): void

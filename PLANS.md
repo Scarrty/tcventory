@@ -691,10 +691,17 @@ Before this plan can move from `in_progress` to `completed`:
 - [x] Confirmed uncovered mutating endpoints from `routes/api.php` and current audit-enabled controllers/services.
 - [x] Selected next implementation slice: catalog + inventory CRUD audit coverage.
 - [x] Flipped plan status to `in_progress` with explicit verification command set.
-- [ ] Implement WS1 catalog audit hooks and tests.
-- [ ] Implement WS2 inventory CRUD audit hooks and regression tests.
-- [ ] Run WS3 verification gates and capture evidence.
+- [x] Implement WS1 catalog audit hooks and tests.
+- [x] Implement WS2 inventory CRUD audit hooks and regression tests.
+- [x] Run WS3 verification gates and capture evidence.
 - [ ] Execute status-doc sync checklist after implementation proof.
+
+### 10) Verification Evidence (Implementation Run)
+
+- `vendor/bin/pint --test app/Http/Controllers/Api/GameController.php app/Http/Controllers/Api/SetController.php app/Http/Controllers/Api/ProductController.php app/Http/Controllers/Api/InventoryItemController.php tests/Feature/Api/GameApiTest.php tests/Feature/Api/SetApiTest.php tests/Feature/Api/ProductApiTest.php tests/Feature/Api/InventoryItemApiTest.php` ✅
+- `php artisan test tests/Feature/Api/GameApiTest.php tests/Feature/Api/SetApiTest.php tests/Feature/Api/ProductApiTest.php tests/Feature/Api/InventoryItemApiTest.php tests/Feature/Api/FinanceApiTest.php` ✅ (all assertions pass; framework emits non-failing warning output from existing file fixture reads)
+- `vendor/bin/phpstan analyse --memory-limit=1G` ✅
+- `php artisan audit:verify-chain` ⚠️ fails in this environment because `/workspace/tcventory/database/database.sqlite` does not exist.
 
 ### 10) Selected Scope Evidence (Planning Pass)
 
