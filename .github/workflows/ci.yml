@@ -150,3 +150,6 @@ jobs:
 
       - name: Run test suite
         run: php artisan test
+
+      - name: Verify audit hash chain integrity
+        run: php artisan audit:verify-chain
