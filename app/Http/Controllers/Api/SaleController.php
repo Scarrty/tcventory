@@ -7,13 +7,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreSaleRequest;
 use App\Models\Sale;
+use App\Services\Audit\HashChainAuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
-    public function __construct()
+    public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(Sale::class, 'sale');
     }
@@ -68,6 +69,38 @@ class SaleController extends Controller
             }
 
             return $sale->load('items');
+        });
+
+        $actor = $request->user();
+        DB::afterCommit(function () use ($sale, $actor): void {
+            $this->auditLogger->log(
+                eventType: 'finance.sale.created',
+                auditable: $sale,
+                changes: [
+                    'sale_id' => $sale->id,
+                    'request_key' => $sale->request_key,
+                    'totals' => [
+                        'gross_amount' => $sale->gross_amount,
+                        'shipping_amount' => $sale->shipping_amount,
+                        'fee_amount' => $sale->fee_amount,
+                        'tax_amount' => $sale->tax_amount,
+                        'net_amount' => $sale->net_amount,
+                        'currency' => $sale->currency,
+                    ],
+                    'items' => $sale->items->map(fn ($item): array => [
+                        'product_id' => $item->product_id,
+                        'inventory_item_id' => $item->inventory_item_id,
+                        'quantity' => $item->quantity,
+                        'unit_price_amount' => $item->unit_price_amount,
+                        'line_total_amount' => $item->line_total_amount,
+                    ])->all(),
+                ],
+                context: [
+                    'source' => 'api.v1.sales.store',
+                    'channel' => $sale->channel,
+                ],
+                actor: $actor,
+            );
         });
 
         return response()->json(['data' => $sale], 201);

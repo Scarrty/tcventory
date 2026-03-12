@@ -16,6 +16,90 @@ Each plan entry in this file uses the following structure:
 
 ---
 
+## PLAN-2026-03-12-PHASE4-IMPLEMENTATION — Phase 4 Audit Hash Chain (Core Finance Write Flows)
+
+- **Status:** `completed`
+- **Owner:** Codex implementation pass
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- Phase 3 finance endpoints are complete and stable.
+- Audit table schema (`audit_events`) already supports `event_hash` and `previous_hash`, but write flows do not yet populate it.
+- Readiness documentation exists (`docs/audit-phase4-readiness.md`), including required finance hooks.
+
+### 2) Objectives
+
+1. Implement append-only audit hash-chain event persistence for finance create flows.
+2. Emit finance audit events only after successful transaction commit.
+3. Add chain integrity verification command and automated tests.
+
+### 3) Non-Objectives
+
+- No systemwide expansion to every domain write flow yet.
+- No full operations/runbook implementation in this pass.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Audit Event Writer Service
+
+- Add canonical payload serializer and hash computation (`previous_hash`, `event_hash`).
+- Persist actor/auditable metadata + payload/context snapshots.
+
+#### WS2 — Finance Flow Integration
+
+- Integrate post-commit event emission into:
+  - `POST /api/v1/purchases`
+  - `POST /api/v1/sales`
+  - `POST /api/v1/valuations`
+- Preserve idempotent behavior (`request_key`) and avoid duplicate events on replay responses.
+
+#### WS3 — Chain Verification + Tests
+
+- Add Artisan command for hash-chain continuity checks.
+- Add feature tests asserting:
+  - finance write flows create corresponding audit events,
+  - `previous_hash` -> `event_hash` continuity,
+  - integrity checker passes for valid chain.
+
+### 5) Verification Evidence Requirements
+
+1. `php artisan test tests/Feature/Api/FinanceApiTest.php`
+2. `php artisan test` (or documented environmental warning if unrelated suites fail)
+3. `vendor/bin/pint --test`
+4. `vendor/bin/phpstan analyse --memory-limit=1G`
+5. `php artisan audit:verify-chain`
+
+### 6) Risks and Mitigations
+
+- **Risk:** Hash serialization drift causes unstable hashes.
+  - **Mitigation:** deterministic recursive key sorting before JSON encoding.
+- **Risk:** Event written before DB commit.
+  - **Mitigation:** explicit `DB::afterCommit` hooks around writer invocation.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Finance create flows emit append-only audit events with linked hashes.
+2. Integrity command confirms valid chain on test data.
+3. Tests and quality gates provide evidence.
+
+### 8) Decision Log
+
+- **2026-03-12:** Scope narrowed to finance write flows from readiness checklist for minimal-risk Phase 4 kickoff.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Create `AuditEvent` model + dedicated audit hash-chain writer service.
+- [x] Wire `PurchaseController@store` post-commit audit event emission.
+- [x] Wire `SaleController@store` post-commit audit event emission.
+- [x] Wire `ValuationController@store` post-commit audit event emission.
+- [x] Add `audit:verify-chain` Artisan command.
+- [x] Add finance audit feature tests and command coverage.
+- [x] Run verification commands and capture evidence.
+- [x] Mark plan `completed` if all exit criteria are met.
+
+---
+
 ## PLAN-2026-03-12-NEXT-PHASE — Phase 3 Completion (Finance & Valuation) + Phase 4 Readiness
 
 - **Status:** `completed`

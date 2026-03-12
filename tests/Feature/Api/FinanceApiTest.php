@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Models\AuditEvent;
 use App\Models\InventoryItem;
 use App\Models\StorageLocation;
 use App\Models\User;
@@ -82,6 +83,12 @@ class FinanceApiTest extends TestCase
             ->assertJsonPath('data.kpis.sale_gross_total', 30)
             ->assertJsonPath('data.kpis.fee_burden_total', 3)
             ->assertJsonPath('data.kpis.unrealized_profit_loss', 5);
+
+        $this->assertSame(3, AuditEvent::query()->count());
+        $this->assertSame(
+            ['finance.purchase.created', 'finance.sale.created', 'finance.valuation.created'],
+            AuditEvent::query()->orderBy('id')->pluck('event_type')->all(),
+        );
     }
 
     public function test_finance_summary_supports_custom_period_and_channel_breakdown(): void
@@ -194,5 +201,52 @@ class FinanceApiTest extends TestCase
         $this->getJson('/api/v1/reports/finance-summary?period=month&from_date=2026-03-01&to_date=2026-03-31')
             ->assertUnprocessable()
             ->assertJsonValidationErrors(['period']);
+    }
+
+    public function test_finance_audit_chain_links_events_and_verify_command_passes(): void
+    {
+        $user = $this->createUserWithPermissions(['finance.view', 'finance.create']);
+        Sanctum::actingAs($user);
+
+        [, , $product] = $this->createCatalogFixture();
+        $location = StorageLocation::factory()->create();
+        $inventoryItem = InventoryItem::factory()->for($product)->for($location)->create();
+
+        $this->postJson('/api/v1/purchases', [
+            'purchased_at' => now()->toISOString(),
+            'request_key' => 'chain-purchase',
+            'items' => [[
+                'product_id' => $product->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'quantity' => 1,
+                'unit_cost_amount' => 11,
+            ]],
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/sales', [
+            'sold_at' => now()->toISOString(),
+            'request_key' => 'chain-sale',
+            'items' => [[
+                'product_id' => $product->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'quantity' => 1,
+                'unit_price_amount' => 22,
+            ]],
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/valuations', [
+            'inventory_item_id' => $inventoryItem->id,
+            'value_amount' => 21,
+            'valued_at' => now()->toISOString(),
+        ])->assertCreated();
+
+        $events = AuditEvent::query()->orderBy('id')->get();
+
+        $this->assertCount(3, $events);
+        $this->assertNull($events[0]->previous_hash);
+        $this->assertSame($events[0]->event_hash, $events[1]->previous_hash);
+        $this->assertSame($events[1]->event_hash, $events[2]->previous_hash);
+
+        $this->artisan('audit:verify-chain')->assertSuccessful();
     }
 }

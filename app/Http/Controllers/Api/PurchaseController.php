@@ -7,13 +7,14 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StorePurchaseRequest;
 use App\Models\Purchase;
+use App\Services\Audit\HashChainAuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseController extends Controller
 {
-    public function __construct()
+    public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(Purchase::class, 'purchase');
     }
@@ -68,6 +69,35 @@ class PurchaseController extends Controller
             }
 
             return $purchase->load('items');
+        });
+
+        $actor = $request->user();
+        DB::afterCommit(function () use ($purchase, $actor): void {
+            $this->auditLogger->log(
+                eventType: 'finance.purchase.created',
+                auditable: $purchase,
+                changes: [
+                    'purchase_id' => $purchase->id,
+                    'request_key' => $purchase->request_key,
+                    'totals' => [
+                        'subtotal_amount' => $purchase->subtotal_amount,
+                        'shipping_amount' => $purchase->shipping_amount,
+                        'fee_amount' => $purchase->fee_amount,
+                        'tax_amount' => $purchase->tax_amount,
+                        'total_amount' => $purchase->total_amount,
+                        'currency' => $purchase->currency,
+                    ],
+                    'items' => $purchase->items->map(fn ($item): array => [
+                        'product_id' => $item->product_id,
+                        'inventory_item_id' => $item->inventory_item_id,
+                        'quantity' => $item->quantity,
+                        'unit_cost_amount' => $item->unit_cost_amount,
+                        'line_total_amount' => $item->line_total_amount,
+                    ])->all(),
+                ],
+                context: ['source' => 'api.v1.purchases.store'],
+                actor: $actor,
+            );
         });
 
         return response()->json(['data' => $purchase], 201);
