@@ -67,7 +67,6 @@ class InventoryServicesTest extends TestCase
         ]);
     }
 
-
     public function test_delete_inventory_item_service_rejects_when_movements_exist(): void
     {
         $item = $this->createInventoryItem(quantity: 3);

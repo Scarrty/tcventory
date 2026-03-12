@@ -147,7 +147,6 @@ class InventoryItemApiTest extends TestCase
         ]);
     }
 
-
     public function test_destroy_returns_forbidden_for_unauthorized_role(): void
     {
         [$inventoryItem] = $this->createInventoryFixture(quantity: 4);

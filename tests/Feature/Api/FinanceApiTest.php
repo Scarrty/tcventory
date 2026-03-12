@@ -7,6 +7,7 @@ namespace Tests\Feature\Api;
 use App\Models\InventoryItem;
 use App\Models\StorageLocation;
 use App\Models\User;
+use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Tests\Concerns\ApiTestData;
@@ -77,7 +78,88 @@ class FinanceApiTest extends TestCase
             ->assertJsonPath('data.purchase_total', 23)
             ->assertJsonPath('data.sale_net_total', 26)
             ->assertJsonPath('data.realized_profit_loss', 3)
-            ->assertJsonPath('data.latest_inventory_valuation', 28);
+            ->assertJsonPath('data.latest_inventory_valuation', 28)
+            ->assertJsonPath('data.kpis.sale_gross_total', 30)
+            ->assertJsonPath('data.kpis.fee_burden_total', 3)
+            ->assertJsonPath('data.kpis.unrealized_profit_loss', 5);
+    }
+
+    public function test_finance_summary_supports_custom_period_and_channel_breakdown(): void
+    {
+        $user = $this->createUserWithPermissions(['finance.view', 'finance.create']);
+        Sanctum::actingAs($user);
+
+        [, , $product] = $this->createCatalogFixture();
+        $location = StorageLocation::factory()->create();
+        $inventoryItem = InventoryItem::factory()->for($product)->for($location)->create();
+
+        $inside = CarbonImmutable::parse('2026-03-10T12:00:00Z');
+        $outside = CarbonImmutable::parse('2026-02-10T12:00:00Z');
+
+        $this->postJson('/api/v1/purchases', [
+            'purchased_at' => $inside->toISOString(),
+            'items' => [[
+                'product_id' => $product->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'quantity' => 1,
+                'unit_cost_amount' => 10,
+            ]],
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/purchases', [
+            'purchased_at' => $outside->toISOString(),
+            'items' => [[
+                'product_id' => $product->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'quantity' => 1,
+                'unit_cost_amount' => 99,
+            ]],
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/sales', [
+            'channel' => 'ebay',
+            'sold_at' => $inside->toISOString(),
+            'fee_amount' => 2,
+            'tax_amount' => 1,
+            'items' => [[
+                'product_id' => $product->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'quantity' => 1,
+                'unit_price_amount' => 30,
+            ]],
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/sales', [
+            'channel' => 'cardmarket',
+            'sold_at' => $inside->toISOString(),
+            'items' => [[
+                'product_id' => $product->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'quantity' => 1,
+                'unit_price_amount' => 5,
+            ]],
+        ])->assertCreated();
+
+        $this->postJson('/api/v1/sales', [
+            'channel' => 'ebay',
+            'sold_at' => $outside->toISOString(),
+            'items' => [[
+                'product_id' => $product->id,
+                'inventory_item_id' => $inventoryItem->id,
+                'quantity' => 1,
+                'unit_price_amount' => 777,
+            ]],
+        ])->assertCreated();
+
+        $response = $this->getJson('/api/v1/reports/finance-summary?period=custom&from_date=2026-03-01&to_date=2026-03-31&group_by=channel&channel=ebay');
+
+        $response->assertOk()
+            ->assertJsonPath('data.kpis.purchase_total', 10)
+            ->assertJsonPath('data.kpis.sale_gross_total', 30)
+            ->assertJsonPath('data.kpis.sale_net_total', 27)
+            ->assertJsonPath('data.kpis.fee_burden_total', 2)
+            ->assertJsonPath('data.kpis.tax_burden_total', 1)
+            ->assertJsonCount(2, 'data.breakdown.by_channel');
     }
 
     public function test_finance_permissions_are_enforced(): void
@@ -98,5 +180,19 @@ class FinanceApiTest extends TestCase
             'purchased_at' => 'not-a-date',
             'items' => [],
         ])->assertUnprocessable()->assertJsonValidationErrors(['purchased_at', 'items']);
+    }
+
+    public function test_finance_summary_validation_for_period_filter_combinations(): void
+    {
+        $user = $this->createUserWithPermissions(['finance.view']);
+        Sanctum::actingAs($user);
+
+        $this->getJson('/api/v1/reports/finance-summary?period=custom')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['period']);
+
+        $this->getJson('/api/v1/reports/finance-summary?period=month&from_date=2026-03-01&to_date=2026-03-31')
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['period']);
     }
 }

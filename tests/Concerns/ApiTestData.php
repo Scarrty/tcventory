@@ -65,5 +65,4 @@ trait ApiTestData
             'occurred_at' => now(),
         ]);
     }
-
 }

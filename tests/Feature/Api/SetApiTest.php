@@ -91,7 +91,6 @@ class SetApiTest extends TestCase
         $this->assertSoftDeleted('sets', ['id' => $set->id]);
     }
 
-
     public function test_destroy_returns_forbidden_for_unauthorized_role(): void
     {
         $viewer = User::factory()->create();
