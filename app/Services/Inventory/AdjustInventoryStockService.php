@@ -6,20 +6,26 @@ namespace App\Services\Inventory;
 
 use App\Models\InventoryItem;
 use App\Models\InventoryMovement;
+use App\Services\Audit\HashChainAuditLogger;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class AdjustInventoryStockService
 {
+    public function __construct(private readonly HashChainAuditLogger $auditLogger) {}
+
     public function execute(
         InventoryItem $inventoryItem,
         int $quantityDelta,
         ?string $reason = null,
         ?string $requestKey = null,
+        ?Authenticatable $actor = null,
     ): InventoryItem {
-        return DB::transaction(function () use ($inventoryItem, $quantityDelta, $reason, $requestKey): InventoryItem {
+        return DB::transaction(function () use ($inventoryItem, $quantityDelta, $reason, $requestKey, $actor): InventoryItem {
             /** @var InventoryItem $lockedItem */
             $lockedItem = InventoryItem::query()->lockForUpdate()->findOrFail($inventoryItem->id);
+            $quantityBefore = $lockedItem->quantity;
 
             if ($quantityDelta === 0) {
                 throw ValidationException::withMessages([
@@ -55,6 +61,27 @@ class AdjustInventoryStockService
                 ],
                 'occurred_at' => now(),
             ]);
+
+            DB::afterCommit(function () use ($lockedItem, $quantityDelta, $quantityBefore, $newQuantity, $reason, $requestKey, $actor): void {
+                $this->auditLogger->log(
+                    eventType: 'inventory.stock.adjusted',
+                    auditable: $lockedItem,
+                    changes: [
+                        'inventory_item_id' => $lockedItem->id,
+                        'request_key' => $requestKey,
+                        'quantity_delta' => $quantityDelta,
+                        'reason' => $reason,
+                        'before' => [
+                            'quantity' => $quantityBefore,
+                        ],
+                        'after' => [
+                            'quantity' => $newQuantity,
+                        ],
+                    ],
+                    context: ['source' => 'api.v1.inventory.adjust-stock'],
+                    actor: $actor,
+                );
+            });
 
             return InventoryItem::query()->findOrFail($lockedItem->id)->fresh();
         });

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Feature\Api;
 
+use App\Models\AuditEvent;
 use App\Models\InventoryMovement;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -128,6 +129,56 @@ class InventoryItemApiTest extends TestCase
 
         $this->assertDatabaseHas('inventory_items', ['id' => $inventoryItem->id, 'quantity' => 2]);
         $this->assertSame(1, InventoryMovement::query()->where('movement_type', 'adjustment')->count());
+    }
+
+    public function test_inventory_transfer_and_adjustment_emit_audit_chain_events(): void
+    {
+        $user = $this->createUserWithPermissions(['inventory.update']);
+        Sanctum::actingAs($user);
+
+        [$inventoryItem, $sourceLocation, $targetLocation] = $this->createInventoryFixture(quantity: 6);
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/transfer", [
+            'quantity' => 2,
+            'target_storage_location_id' => $targetLocation->id,
+            'reason' => 'Audit transfer',
+            'request_key' => 'audit-transfer-1',
+        ])->assertOk();
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/transfer", [
+            'quantity' => 2,
+            'target_storage_location_id' => $targetLocation->id,
+            'reason' => 'Audit transfer',
+            'request_key' => 'audit-transfer-1',
+        ])->assertOk();
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/adjust-stock", [
+            'quantity_delta' => -1,
+            'reason' => 'Audit adjust',
+            'request_key' => 'audit-adjust-1',
+        ])->assertOk();
+
+        $this->postJson("/api/v1/inventory-items/{$inventoryItem->id}/adjust-stock", [
+            'quantity_delta' => -1,
+            'reason' => 'Audit adjust',
+            'request_key' => 'audit-adjust-1',
+        ])->assertOk();
+
+        $events = AuditEvent::query()->orderBy('id')->get();
+
+        $this->assertCount(2, $events);
+        $this->assertSame(
+            ['inventory.transfer.executed', 'inventory.stock.adjusted'],
+            $events->pluck('event_type')->all(),
+        );
+        $this->assertNull($events[0]->previous_hash);
+        $this->assertSame($events[0]->event_hash, $events[1]->previous_hash);
+
+        $this->assertSame($sourceLocation->id, $events[0]->changes['from_storage_location_id']);
+        $this->assertSame($targetLocation->id, $events[0]->changes['to_storage_location_id']);
+        $this->assertSame(-1, $events[1]->changes['quantity_delta']);
+
+        $this->artisan('audit:verify-chain')->assertSuccessful();
     }
 
     public function test_destroy_soft_deletes_inventory_item_and_archives_movement(): void
