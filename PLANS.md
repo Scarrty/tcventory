@@ -339,3 +339,83 @@ This plan is done when:
 - `vendor/bin/pint --test` ✅.
 - `vendor/bin/phpstan analyse --memory-limit=1G` ✅.
 - `php artisan test` ⚠️ failed due to environment/frontend setup gap (`public/build/manifest.json` missing and `.env` file-read warnings in non-API feature tests).
+
+---
+
+## PLAN-2026-03-12-CI-WORKFLOW-REPAIR — GitHub Actions CI/Release Error Audit
+
+- **Status:** `completed`
+- **Owner:** Codex workflow maintenance pass
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- Repository defines two workflow files: `.github/workflows/ci.yml` and `.github/workflows/release.yml`.
+- `composer.json` requires PHP `^8.4`, while CI jobs were configured to run PHP `8.3`, which causes dependency installation failures.
+- Release workflow configuration requires validation for obvious syntax/config issues.
+
+### 2) Objectives
+
+1. Audit CI and Release workflows for configuration/runtime mismatches.
+2. Fix root-cause workflow errors preventing successful Actions runs.
+3. Validate the updated workflow configuration with local checks where possible.
+
+### 3) Non-Objectives
+
+- No application runtime feature changes.
+- No Docker image redesign beyond workflow correctness.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Workflow Audit
+- Inspect all workflow YAML files and compare runtime versions against project requirements.
+
+**Deliverables**
+- Identified root-cause error list.
+
+#### WS2 — Workflow Corrections
+- Update CI workflow runtime settings to satisfy Composer/Laravel requirements.
+- Keep Release workflow untouched unless concrete errors are found.
+
+**Deliverables**
+- Updated `.github/workflows/ci.yml`.
+
+#### WS3 — Verification
+- Run local workflow-adjacent checks that exercise the corrected assumptions.
+- Record evidence in this plan section.
+
+**Deliverables**
+- Command evidence log showing corrected setup compatibility.
+
+### 5) Verification Evidence Requirements
+
+- Confirm workflow files parse and are discoverable.
+- Confirm PHP runtime requirement alignment (`composer.json` vs CI yaml).
+- Run at least one local command proving PHP 8.4 expectation is now represented in workflow config.
+
+### 6) Risks and Mitigations
+
+- **Risk:** Additional hidden CI failures unrelated to PHP version.
+  - **Mitigation:** Keep changes minimal and focused on deterministic mismatch; surface residual risks in evidence log.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. CI workflow PHP versions align with project PHP requirements.
+2. Workflow audit covers both CI and Release files.
+3. Verification evidence is recorded and plan status updated to `completed`.
+
+### 8) Decision Log
+
+- **2026-03-12:** Prioritized fixing deterministic PHP version mismatch first, since it blocks all Composer-based CI jobs.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Audit `.github/workflows/ci.yml` and `.github/workflows/release.yml`.
+- [x] Identify root cause(s) of likely workflow failure.
+- [x] Apply minimal workflow fix(es).
+- [x] Run verification commands and capture evidence.
+- [x] Mark plan as completed once evidence is logged.
+
+### 10) Verification Evidence Log (Current Run)
+
+- `rg "php-version|\"php\"" composer.json .github/workflows/ci.yml .github/workflows/release.yml` ✅ (all CI jobs now request PHP 8.4, matching Composer constraints in `composer.json`).
