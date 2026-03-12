@@ -16,6 +16,91 @@ Each plan entry in this file uses the following structure:
 
 ---
 
+## PLAN-2026-03-12-CODEBASE-MODERNIZATION — API Surface Cleanup + Legacy Removal
+
+- **Status:** `completed`
+- **Owner:** Codex modernization pass
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- The API controllers implement repeated pagination normalization/response-shaping logic (`per_page` bounds + `meta` payload) in multiple files.
+- Finance summary still returns top-level compatibility aliases in addition to canonical nested `kpis` fields.
+- Dependency declaration currently places Sanctum in `require-dev` although runtime API auth and tests rely on it.
+- Repository still includes default scaffold tests (`tests/Feature/ExampleTest.php`, `tests/Unit/ExampleTest.php`) that no longer reflect product behavior.
+
+### 2) Objectives
+
+1. Remove legacy/compatibility response remnants and standardize on canonical finance report payload.
+2. Reduce controller duplication by introducing a reusable API pagination helper.
+3. Align dependency/runtime declarations and docs with current deployable architecture.
+4. Remove stale scaffold artifacts that add maintenance noise.
+
+### 3) Non-Objectives
+
+- No endpoint contract expansion.
+- No schema/migration rewrites.
+- No broad rewrite of business logic outside targeted cleanup.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Shared API Pagination Primitive
+
+- Add a reusable controller concern for bounded `per_page` parsing and paginated JSON shape.
+- Refactor API controllers to use the concern without changing response semantics.
+
+#### WS2 — Finance Legacy Alias Removal
+
+- Remove top-level legacy KPI aliases from finance-summary response payload.
+- Update tests/docs to reflect the canonical nested `data.kpis.*` contract.
+
+#### WS3 — Dependency/Scaffold Cleanup
+
+- Move `laravel/sanctum` into runtime dependencies.
+- Remove obsolete scaffold example tests and update docs where needed.
+
+### 5) Verification Evidence Requirements
+
+Required before completion:
+
+1. `vendor/bin/pint --test` on touched PHP files.
+2. `php artisan test` passes.
+3. `vendor/bin/phpstan analyse --memory-limit=1G` passes.
+
+### 6) Risks and Mitigations
+
+- **Risk:** Finance response change may break consumers expecting aliases.
+  - **Mitigation:** treat alias removal as intentional migration-remnant cleanup and sync docs/tests in same change.
+- **Risk:** Shared pagination helper could alter response shape.
+  - **Mitigation:** retain existing JSON envelope structure and verify via feature tests.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Repeated pagination logic replaced with shared helper in API controllers.
+2. Finance response contains only canonical structure; tests/docs updated.
+3. Dependencies and repository artifacts reflect clean deployable state.
+4. Verification commands recorded with outcomes.
+
+### 8) Decision Log
+
+- **2026-03-12:** Prioritized high-signal modernization over broad stylistic churn to keep risk low while removing clear legacy remnants.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Create active modernization plan entry before code changes.
+- [x] Implement WS1 shared pagination concern and controller updates.
+- [x] Implement WS2 finance payload cleanup + contract updates.
+- [x] Implement WS3 dependency/scaffold cleanup.
+- [x] Run verification commands and record evidence.
+
+### 10) Verification Evidence Log (Current Run)
+
+- `vendor/bin/pint --test app/Http/Controllers/Api/Concerns/InteractsWithApiPagination.php app/Http/Controllers/Api/GameController.php app/Http/Controllers/Api/SetController.php app/Http/Controllers/Api/ProductController.php app/Http/Controllers/Api/InventoryItemController.php app/Http/Controllers/Api/PurchaseController.php app/Http/Controllers/Api/SaleController.php app/Http/Controllers/Api/ValuationController.php app/Http/Controllers/Api/FinanceReportController.php tests/Feature/Api/FinanceApiTest.php` ✅
+- `php artisan test` ✅ (passes; suite emits existing non-failing `file_get_contents(.../.env)` warnings from pre-existing test output formatting)
+- `vendor/bin/phpstan analyse --memory-limit=1G` ✅
+
+---
+
 ## PLAN-2026-03-12-DOC-SYNC — Documentation Structure Alignment (README-anchored)
 
 - **Status:** `completed`

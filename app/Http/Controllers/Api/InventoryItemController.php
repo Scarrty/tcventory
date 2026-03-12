@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\InteractsWithApiPagination;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\AdjustInventoryStockRequest;
 use App\Http\Requests\Api\StoreInventoryItemRequest;
@@ -20,6 +21,8 @@ use Illuminate\Support\Facades\DB;
 
 class InventoryItemController extends Controller
 {
+    use InteractsWithApiPagination;
+
     public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(InventoryItem::class, 'inventory_item');
@@ -27,20 +30,12 @@ class InventoryItemController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->integer('per_page', 15);
         $inventoryItems = InventoryItem::query()
             ->with(['product.game', 'product.set', 'storageLocation'])
             ->latest('id')
-            ->paginate(max(1, min($perPage, 100)));
+            ->paginate($this->resolvePerPage($request));
 
-        return response()->json([
-            'data' => $inventoryItems->items(),
-            'meta' => [
-                'current_page' => $inventoryItems->currentPage(),
-                'per_page' => $inventoryItems->perPage(),
-                'total' => $inventoryItems->total(),
-            ],
-        ]);
+        return $this->paginatedResponse($inventoryItems);
     }
 
     public function store(StoreInventoryItemRequest $request): JsonResponse

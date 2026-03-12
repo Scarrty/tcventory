@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\InteractsWithApiPagination;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\StoreSaleRequest;
 use App\Models\Sale;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 
 class SaleController extends Controller
 {
+    use InteractsWithApiPagination;
+
     public function __construct(private readonly HashChainAuditLogger $auditLogger)
     {
         $this->authorizeResource(Sale::class, 'sale');
@@ -21,14 +24,9 @@ class SaleController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        $perPage = (int) $request->integer('per_page', 15);
-        $sales = Sale::query()->with('items')->latest('id')->paginate(max(1, min($perPage, 100)));
+        $sales = Sale::query()->with('items')->latest('id')->paginate($this->resolvePerPage($request));
 
-        return response()->json(['data' => $sales->items(), 'meta' => [
-            'current_page' => $sales->currentPage(),
-            'per_page' => $sales->perPage(),
-            'total' => $sales->total(),
-        ]]);
+        return $this->paginatedResponse($sales);
     }
 
     public function store(StoreSaleRequest $request): JsonResponse

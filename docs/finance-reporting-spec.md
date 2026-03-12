@@ -36,11 +36,7 @@ When `group_by=channel`, the response includes `breakdown.by_channel` with:
 
 Null channels are normalized to `unknown`.
 
-## Backward Compatibility
+## Response Shape
 
-The response still exposes top-level legacy fields:
-
-- `purchase_total`
-- `sale_net_total`
-- `realized_profit_loss`
-- `latest_inventory_valuation`
+The canonical response format exposes financial aggregates under `data.kpis`.
+Legacy top-level KPI aliases have been removed to keep the contract consistent.
