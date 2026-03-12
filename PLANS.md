@@ -419,3 +419,91 @@ This plan is done when:
 ### 10) Verification Evidence Log (Current Run)
 
 - `rg "php-version|\"php\"" composer.json .github/workflows/ci.yml .github/workflows/release.yml` ✅ (all CI jobs now request PHP 8.4, matching Composer constraints in `composer.json`).
+
+---
+
+## PLAN-2026-03-12-DOC-CURRENT-STATE — Repository-wide Documentation Cleanup
+
+- **Status:** `completed`
+- **Owner:** Codex documentation maintenance pass
+- **Last Updated:** 2026-03-12
+
+### 1) Context Snapshot
+
+- Mehrere aktive Dokumente tragen noch den Statusstempel `2026-03-06`.
+- In `PLANS.md` sind mittlerweile Phase-3-Abschluss und ein Phase-4-Audit-Start bereits als `completed` belegt.
+- `docs/projektstruktur.md` beschreibt derzeit überwiegend ein Zielbild, das nicht mehr der tatsächlich versionierten Verzeichnisstruktur entspricht.
+
+### 2) Objectives
+
+1. Alle aktiven Kern-Dokumente auf den aktuellen Projektstand synchronisieren.
+2. Veraltete Status-/Phasenangaben auf Basis der vorhandenen Implementierung und Plan-Evidenz korrigieren.
+3. Dokumentrollen gemäß `docs/README.md` beibehalten (kein Architekturwechsel der Dokumentation).
+
+### 3) Non-Objectives
+
+- Keine Code- oder API-Verhaltensänderung.
+- Keine Änderung historischer Snapshot-Dokumente unter `docs/reviews/` oder Release-Notes.
+
+### 4) Workstreams and Deliverables
+
+#### WS1 — Baseline-Audit
+
+- Prüfen der aktiven Root-Dokumente (`README.md`, `PROJECT_OVERVIEW.md`, `ROADMAP.md`, `PROGRESS.md`, `API_DOCS.md`, `spec.md`, `CHANGELOG.md`) gegen Implementierungsstand.
+- Prüfen von `docs/projektstruktur.md` auf strukturelle Aktualität.
+
+**Deliverables**
+- Konkrete Liste der zu korrigierenden Stellen in den betroffenen Dateien.
+
+#### WS2 — Dokumentaktualisierung
+
+- Status- und Inhaltskorrekturen in den aktiven Dokumenten durchführen.
+- Veraltete oder widersprüchliche Formulierungen bereinigen.
+
+**Deliverables**
+- Aktualisierte Dokumente mit konsistentem Standbild (2026-03-12).
+
+#### WS3 — Verifikation
+
+- Konsistenzprüfungen via gezielte `rg`-Checks für Datum/Phasenstatus.
+- Kurzprüfung auf unstimmige Endpunkt-/Strukturangaben.
+
+**Deliverables**
+- Verifikationslog in diesem Plan inkl. ausgeführter Kommandos.
+
+### 5) Verification Evidence Requirements
+
+1. Keine aktiven Kern-Dokumente enthalten mehr den veralteten Stempel `Stand: 2026-03-06`.
+2. `README.md`, `ROADMAP.md` und `PROGRESS.md` widersprechen nicht dem in `PLANS.md` dokumentierten Abschluss von Phase 3 und dem gestarteten Phase-4-Scope.
+3. `docs/projektstruktur.md` spiegelt die real im Repo vorhandene Struktur wider.
+
+### 6) Risks and Mitigations
+
+- **Risk:** Überkorrektur historischer Aussagen.
+  - **Mitigation:** Nur aktive Dokumente anfassen, historische Snapshot-Dateien unverändert lassen.
+- **Risk:** Inkonsistente Statussprache zwischen Roadmap (Soll) und Progress (Ist).
+  - **Mitigation:** Rollen strikt trennen: Roadmap = Vorwärtsblick, Progress = Live-Ist.
+
+### 7) Exit Criteria (Definition of Done)
+
+1. Alle betroffenen aktiven Doku-Dateien sind konsistent auf dem aktuellen Stand.
+2. Plan-Evidenz enthält die ausgeführten Verifikationskommandos.
+3. Änderungen sind committed und in einer PR-Zusammenfassung dokumentiert.
+
+### 8) Decision Log
+
+- **2026-03-12:** Dokument-Cleanup auf aktive Dateien begrenzt, um historische Evidenz nicht zu verfälschen.
+- **2026-03-12:** Statuskorrekturen werden an bereits abgeschlossene Plan-Einträge gekoppelt statt an Schätzwerte.
+
+### 9) Execution Checklist (Current Run)
+
+- [x] Baseline-Audit der aktiven Dokumente durchgeführt.
+- [x] Status-/Inhaltskorrekturen in den betroffenen Dateien umgesetzt.
+- [x] Verifikationskommandos ausgeführt und Evidenz protokolliert.
+- [x] Planstatus auf `completed` gesetzt.
+
+### 10) Verification Evidence Log (Current Run)
+
+- `git status --short` ✅ (nur geplante Dokumentdateien und `PLANS.md` geändert).
+- `rg -n "Stand: 2026-03-06" README.md PROJECT_OVERVIEW.md ROADMAP.md PROGRESS.md API_DOCS.md spec.md docs/projektstruktur.md CHANGELOG.md` ✅ (keine Treffer).
+- `rg -n "Phase 3|Phase 4|finance-summary|audit:verify-chain" README.md ROADMAP.md PROGRESS.md PROJECT_OVERVIEW.md API_DOCS.md` ✅ (Status- und Featureaussagen konsistent auffindbar).

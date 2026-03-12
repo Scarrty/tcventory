@@ -1,42 +1,22 @@
 # Projektstruktur – TCventory
 
-
 ## Dokumentationsstatus
 
-- Stand: 2026-03-06
-- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+- Stand: 2026-03-12
+- Strukturübersicht auf den realen Repository-Zustand aktualisiert.
 
-Diese Struktur bildet die in der technischen Spezifikation beschriebene modulare Laravel-Organisation ab.
+Diese Struktur beschreibt die aktuell versionierte Projektorganisation (vereinfachte, aber reale Top-Level-Sicht).
 
 ```text
 app/
-  Actions/
-    Inventory/
-    Sales/
-    Purchases/
-  Domain/
-    Catalog/
-    Inventory/
-    Finance/
-    Audit/
-    Shared/
   Filament/
-    Resources/
-    Pages/
-    Widgets/
   Http/
     Controllers/
-      Api/
-        V1/
     Requests/
-    Resources/
-  Jobs/
-  Listeners/
-  Observers/
+  Models/
   Policies/
   Providers/
   Services/
-  Support/
 
 bootstrap/
 config/
@@ -44,25 +24,29 @@ database/
   factories/
   migrations/
   seeders/
-
+docker/
+  app/
+  nginx/
+docs/
+  deployment/
+  releases/
+  reviews/
+public/
 resources/
-  views/
   css/
   js/
-
-tests/
-  Feature/
-    Api/
-    Filament/
-  Unit/
-    Domain/
-    Services/
-
+  views/
 routes/
-  web.php
-  api.php
-
 storage/
+tests/
+  Concerns/
+  Feature/
+  Unit/
+
+.github/
+  workflows/
 ```
 
-Hinweis: Leere Verzeichnisse enthalten bewusst `.gitkeep`, damit die Zielstruktur versioniert bleibt.
+## Hinweis
+
+Historische oder Zielbild-Strukturen (z. B. dedizierte `Domain/`- oder `Actions/`-Layer) sind nicht automatisch Bestandteil des aktuellen Dateibaums und werden erst bei konkreter Implementierung ergänzt.

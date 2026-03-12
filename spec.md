@@ -3,7 +3,7 @@
 
 ## Dokumentationsstatus
 
-- Stand: 2026-03-06
+- Stand: 2026-03-12
 - Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
 
 ## 1) Zweck dieses Dokuments
@@ -68,7 +68,7 @@ TCventory ist eine Web-App zur Verwaltung von TCG-Inventar und begleitenden Fina
 
 ---
 
-## 4) Implementierungsstatus (Stand: 2026-03)
+## 4) Implementierungsstatus (Stand: 2026-03-12)
 
 ### Bereits umgesetzt
 - `/api/v1/health`
@@ -79,8 +79,8 @@ TCventory ist eine Web-App zur Verwaltung von TCG-Inventar und begleitenden Fina
 - API-Tokens: `POST /api/v1/tokens`, `GET /api/v1/me`
 
 ### Teilweise umgesetzt / offen
-- Audit-Hash-Chain als systemweit erzwungenes append-only Verhalten
-- Tiefere Finance-/P&L-Reports
+- Audit-Hash-Chain aktuell für Finance-Write-Flows integriert; Ausweitung auf weitere Domänen offen
+- Zusätzliche dedizierte Reports (z. B. Inventory-Value, Profit/Loss)
 - Weitergehende Integrationen und Search-Ausbau
 
 ---

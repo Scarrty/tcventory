@@ -1,262 +1,92 @@
 # API_DOCS
 
-
 ## Dokumentationsstatus
 
-- Stand: 2026-03-06
-- Diese Datei wurde im Rahmen der projektweiten Dokumentationspflege auf Aktualität geprüft und sprachlich vereinheitlicht.
+- Stand: 2026-03-12
+- Auf den aktuellen API-v1-Stand synchronisiert.
 
 ## 1. Überblick
 
-TCventory stellt eine versionierte API unter **`/api/v1`** bereit. Die API ist primär für Integrationen vorgesehen; die Hauptbedienung erfolgt über das Filament-Admin-Interface.
-
-Aktueller Minimalstatus:
-
-- `GET /api/v1/health` liefert einen einfachen API-Status.
-- REST-Endpunkte für `games`, `sets`, `products` und `inventory-items` mit `index/store/show/update/destroy` sind vorhanden.
-- Für Bestandsoperationen sind `transfer` und `adjust-stock` als dedizierte Aktionen vorhanden.
+TCventory stellt eine versionierte API unter **`/api/v1`** bereit. Die API ist für Integrationen optimiert; zentrale Backoffice-Workflows laufen zusätzlich über Filament.
 
 ## 2. Basis-Konventionen
 
 - Basis-Pfad: `/api/v1`
 - JSON-Antworten
-- empfohlene Antwortstruktur (JSON:API-ähnlich):
-  - `data`
-  - `meta` (optional)
-  - `links` (optional)
-- Fehlerstruktur:
-  - `code`
-  - `message`
-  - `details`
-  - `trace_id`
-- Pagination/Filter:
-  - `page`, `per_page`, `sort`, `filter[*]`
-- Idempotency-Key für kritische POST-Endpunkte (insb. Transfers/Korrekturen via `request_key`)
+- Authentifizierung: Sanctum Bearer Token
+- Ressourcenantworten: primär unter `data` (bei Listen inkl. Pagination-Metadaten)
+- Idempotenz für kritische POST-Flows via `request_key`
 
-## 3. Aktuell implementierte Endpunkte
+## 3. Implementierte Endpunkte
 
-Alle Ressourcen-Endpunkte liefern eine konsistente Antwort mit `data` und bei Listen zusätzlich `meta` (Pagination).
+### Health & Access
 
-### Health
-
-#### `GET /api/v1/health`
-
-**Beschreibung:** Prüft den API-Basisstatus.
-
-**Beispielantwort:**
-
-```json
-{
-  "app": "TCventory API",
-  "status": "ok"
-}
-```
-
-### Auth / User (implementiert)
-
+- `GET /api/v1/health`
 - `POST /api/v1/tokens`
 - `GET /api/v1/me`
 
-#### `POST /api/v1/tokens`
+### Katalog
 
-**Auth:** `Bearer` Token über Sanctum (eingeloggt).
+- `GET|POST /api/v1/games`
+- `GET|PATCH|DELETE /api/v1/games/{id}`
+- `GET|POST /api/v1/sets`
+- `GET|PATCH|DELETE /api/v1/sets/{id}`
+- `GET|POST /api/v1/products`
+- `GET|PATCH|DELETE /api/v1/products/{id}`
 
-**Request (JSON):**
+### Inventar
 
-```json
-{
-  "token_name": "ci-integration",
-  "abilities": ["inventory:read", "catalog:read"],
-  "expires_in_minutes": 120
-}
-```
-
-- `abilities` ist optional; Standard ist `inventory:read`.
-- Erlaubte `abilities`: `inventory:read`, `inventory:write`, `catalog:read`, `catalog:write`, `reports:read`.
-
-### Katalog (implementiert)
-
-- `GET /api/v1/games`
-- `POST /api/v1/games`
-- `GET /api/v1/games/{id}`
-- `PATCH /api/v1/games/{id}`
-- `DELETE /api/v1/games/{id}`
-- `GET /api/v1/sets`
-- `POST /api/v1/sets`
-- `GET /api/v1/sets/{id}`
-- `PATCH /api/v1/sets/{id}`
-- `DELETE /api/v1/sets/{id}`
-- `GET /api/v1/products`
-- `POST /api/v1/products`
-- `GET /api/v1/products/{id}`
-- `PATCH /api/v1/products/{id}`
-- `DELETE /api/v1/products/{id}`
-
-### Inventar (implementiert)
-
-- `GET /api/v1/inventory-items`
-- `POST /api/v1/inventory-items`
-- `GET /api/v1/inventory-items/{id}`
-- `PATCH /api/v1/inventory-items/{id}`
-- `DELETE /api/v1/inventory-items/{id}`
+- `GET|POST /api/v1/inventory-items`
+- `GET|PATCH|DELETE /api/v1/inventory-items/{id}`
 - `POST /api/v1/inventory-items/{id}/transfer`
 - `POST /api/v1/inventory-items/{id}/adjust-stock`
 
-#### `POST /api/v1/inventory-items/{id}/transfer`
+### Finanzen & Reporting
 
-**Beschreibung:** Verschiebt Bestand ganz oder teilweise auf einen anderen Lagerort.
-
-**Request (JSON):**
-
-```json
-{
-  "quantity": 3,
-  "target_storage_location_id": 5,
-  "reason": "Umlagerung in Tresor",
-  "request_key": "transfer-2026-03-06-001"
-}
-```
-
-**Beispielantwort (200):**
-
-```json
-{
-  "data": {
-    "id": 42,
-    "product_id": 7,
-    "storage_location_id": 2,
-    "quantity": 7,
-    "condition": "nm",
-    "grading_provider": null,
-    "grade": null
-  }
-}
-```
-
-**Typische Fehlerfälle:**
-
-- `401 Unauthorized`: Kein gültiges Sanctum-Token übermittelt.
-- `403 Forbidden`: Authentifiziert, aber keine `update`-Berechtigung auf das Inventory Item.
-- `404 Not Found`: Inventory Item (`{id}`) existiert nicht.
-- `422 Unprocessable Entity`: Validierung oder Fachregel verletzt, z. B.:
-  - `quantity < 1`
-  - `quantity` größer als verfügbarer Bestand
-  - `target_storage_location_id` ungültig oder identisch mit aktueller Location
-
-#### `POST /api/v1/inventory-items/{id}/adjust-stock`
-
-**Beschreibung:** Korrigiert den Bestand eines Inventory Items über ein Delta (positiv/negativ).
-
-**Request (JSON):**
-
-```json
-{
-  "quantity_delta": -2,
-  "reason": "Beschädigte Exemplare aussortiert",
-  "request_key": "adjust-2026-03-06-003"
-}
-```
-
-**Beispielantwort (200):**
-
-```json
-{
-  "data": {
-    "id": 42,
-    "product_id": 7,
-    "storage_location_id": 2,
-    "quantity": 5,
-    "condition": "nm",
-    "grading_provider": null,
-    "grade": null
-  }
-}
-```
-
-**Typische Fehlerfälle:**
-
-- `401 Unauthorized`: Kein gültiges Sanctum-Token übermittelt.
-- `403 Forbidden`: Authentifiziert, aber keine `update`-Berechtigung auf das Inventory Item.
-- `404 Not Found`: Inventory Item (`{id}`) existiert nicht.
-- `422 Unprocessable Entity`: Validierung oder Fachregel verletzt, z. B.:
-  - `quantity_delta = 0`
-  - Anpassung würde zu negativem Bestand führen
-
-
-### Finanzen & Reporting (implementiert)
-
-- `GET /api/v1/purchases`
-- `POST /api/v1/purchases`
-- `GET /api/v1/sales`
-- `POST /api/v1/sales`
-- `GET /api/v1/valuations`
-- `POST /api/v1/valuations`
+- `GET|POST /api/v1/purchases`
+- `GET|POST /api/v1/sales`
+- `GET|POST /api/v1/valuations`
 - `GET /api/v1/reports/finance-summary`
 
 #### `GET /api/v1/reports/finance-summary`
 
-**Beschreibung:** Liefert KPI-basierte Finanzzusammenfassung mit optionaler Periodisierung, Channel-Filter und Channel-Drilldown.
+Query-Parameter:
 
-**Query-Parameter:**
+- `period`: `all | day | week | month | custom`
+- `from_date`, `to_date` (erforderlich bei `period=custom`)
+- `channel` (optional)
+- `group_by`: `none | channel`
 
-- `period`: `all | day | week | month | custom` (Standard: `all`)
-- `from_date`: Datum (nur erlaubt bei `period=custom`)
-- `to_date`: Datum (nur erlaubt bei `period=custom`, `>= from_date`)
-- `channel`: optionaler exakter Filter (z. B. `ebay`)
-- `group_by`: `none | channel` (Standard: `none`)
+Wesentliche KPIs:
 
-**Typische Fehlerfälle:**
+- `purchase_total`
+- `sale_gross_total`
+- `sale_net_total`
+- `realized_profit_loss`
+- `unrealized_profit_loss`
+- `latest_inventory_valuation`
+- `fee_burden_total`
+- `tax_burden_total`
 
-- `401 Unauthorized`: Kein gültiges Sanctum-Token.
-- `403 Forbidden`: Keine `finance.view`-Berechtigung.
-- `422 Unprocessable Entity`: Ungültige Filterkombinationen oder Datumsvalidierung (z. B. `period=custom` ohne Datumsbereich).
+Bei `group_by=channel` wird ein Channel-Breakdown unter `breakdown.by_channel` geliefert.
 
-## 4. Geplante Endpunkte (laut Spezifikation)
+## 4. Typische Fehlercodes
 
-### 4.1 Auth & Session
+- `401 Unauthorized`: fehlendes/ungültiges Token
+- `403 Forbidden`: fehlende Berechtigung (Policy/RBAC)
+- `404 Not Found`: Ressource nicht vorhanden
+- `422 Unprocessable Entity`: Validierungs-/Fachregelverletzung
 
-- `POST /api/v1/auth/login`
-- `POST /api/v1/auth/logout`
-
-### 4.2 Katalog (Erweiterungen)
-
-- weitere Query-/Filter-Endpunkte gemäß Produktspezifikation
-- Bulk-Import-/Sync-Endpunkte für externe Katalogquellen
-
-### 4.3 Inventar (Erweiterungen)
-
-- `GET /api/v1/inventory-items/{id}/movements`
-- erweiterte Filter-/Reporting-Endpunkte für Bestandsanalysen
-
-### 4.4 Einkauf, Bewertung, Verkauf
-
-- `POST /api/v1/purchases`
-- `GET /api/v1/purchases/{id}`
-- `POST /api/v1/valuations`
-- `GET /api/v1/inventory-items/{id}/valuations`
-- `POST /api/v1/sales`
-- `GET /api/v1/sales/{id}`
-
-### 4.5 Audit & Reporting
+## 5. Geplante API-Erweiterungen (nächste Ausbaustufe)
 
 - `GET /api/v1/audit-events`
 - `GET /api/v1/reports/inventory-value`
 - `GET /api/v1/reports/profit-loss`
+- zusätzliche Detailansichten für Finance (`/purchases/{id}`, `/sales/{id}`)
 
-## 5. Sicherheits- und Betriebsaspekte
+## 6. Sicherheits- und Betriebsaspekte
 
-- RBAC über Rollen/Policies (Laravel)
-- Input-Validation via FormRequests und Domänenregeln
+- RBAC über Rollen/Policies
+- FormRequest-Validierung + Domänenregeln
 - Transaktionale Umsetzung kritischer Flows
-- Strukturierte Logs + Monitoring (Sentry)
-
-## 6. Versionierung und Erweiterung
-
-- Erste stabile Zielversion: `v1`
-- Abwärtsinkompatible Änderungen über neue API-Version
-- Erweiterungen bevorzugt additiv (neue Felder/Endpunkte)
-
-## 7. Stand
-
-- Stand: 2026-03-06
-- Quelle: aktueller Branch-Stand, Commit `379def6`
+- Audit-Hash-Chain-Validierung per `php artisan audit:verify-chain`
