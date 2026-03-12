@@ -182,6 +182,35 @@ Alle Ressourcen-Endpunkte liefern eine konsistente Antwort mit `data` und bei Li
   - `quantity_delta = 0`
   - Anpassung würde zu negativem Bestand führen
 
+
+### Finanzen & Reporting (implementiert)
+
+- `GET /api/v1/purchases`
+- `POST /api/v1/purchases`
+- `GET /api/v1/sales`
+- `POST /api/v1/sales`
+- `GET /api/v1/valuations`
+- `POST /api/v1/valuations`
+- `GET /api/v1/reports/finance-summary`
+
+#### `GET /api/v1/reports/finance-summary`
+
+**Beschreibung:** Liefert KPI-basierte Finanzzusammenfassung mit optionaler Periodisierung, Channel-Filter und Channel-Drilldown.
+
+**Query-Parameter:**
+
+- `period`: `all | day | week | month | custom` (Standard: `all`)
+- `from_date`: Datum (nur erlaubt bei `period=custom`)
+- `to_date`: Datum (nur erlaubt bei `period=custom`, `>= from_date`)
+- `channel`: optionaler exakter Filter (z. B. `ebay`)
+- `group_by`: `none | channel` (Standard: `none`)
+
+**Typische Fehlerfälle:**
+
+- `401 Unauthorized`: Kein gültiges Sanctum-Token.
+- `403 Forbidden`: Keine `finance.view`-Berechtigung.
+- `422 Unprocessable Entity`: Ungültige Filterkombinationen oder Datumsvalidierung (z. B. `period=custom` ohne Datumsbereich).
+
 ## 4. Geplante Endpunkte (laut Spezifikation)
 
 ### 4.1 Auth & Session
