@@ -602,87 +602,101 @@ This plan is done when:
 
 ## PLAN-2026-03-12-NEXT-STEPS-ORCHESTRATION — Immediate Execution Plan (Post Phase-4 Inventory Audit Expansion)
 
-- **Status:** `draft`
+- **Status:** `in_progress`
 - **Owner:** Codex planning pass
 - **Last Updated:** 2026-03-12
 
 ### 1) Context Snapshot
 
-- Core audit hash-chain support is implemented for finance and inventory write flows.
-- Documentation alignment work is completed, but roadmap/progress cadence now depends on selecting the highest-impact next implementation slice.
-- The most likely near-term options are (a) broader write-flow audit coverage beyond current scope and/or (b) operational hardening (monitoring, runbooks, CI-level chain verification).
+- Core audit hash-chain support is implemented for finance write flows and inventory transfer/adjust flows.
+- Uncovered mutating API endpoints still exist in catalog and inventory CRUD resources (`games`, `sets`, `products`, `inventory-items` store/update/destroy), creating an audit-gap for high-impact data changes.
+- Operational hardening remains important, but the highest immediate risk is incomplete audit coverage on core mutation paths.
 
 ### 2) Objectives
 
-1. Provide a concrete, low-ambiguity sequence for the next engineering iteration.
-2. Prioritize work that improves correctness guarantees and operational confidence before expanding product surface area.
-3. Define verification gates so the next run can be executed without re-discovery.
+1. Execute the next implementation slice as **full audit hash-chain coverage for remaining mutating catalog + inventory CRUD flows**.
+2. Keep the change minimal and consistent by reusing `HashChainAuditLogger` patterns already established in finance/inventory services.
+3. Define strict verification gates (tests + chain verification + static checks) for a merge-ready Phase-4 increment.
 
 ### 3) Non-Objectives
 
-- No new feature implementation in this planning-only pass.
-- No refactor of completed Phase-3/Phase-4 flows.
-- No speculative long-term architecture redesign.
+- No redesign of audit schema/hash algorithm.
+- No expansion into reporting endpoints (`inventory-value`, `profit-loss`) in this slice.
+- No operational stack rollout changes (Sentry/Horizon) during this implementation pass.
 
 ### 4) Workstreams and Deliverables
 
-#### WS1 — Scope Selection and Baseline Validation
+#### WS1 — Catalog Write-Flow Audit Coverage
 
-- Reconfirm current behavior for audit event creation on existing finance/inventory write paths.
-- Enumerate uncovered mutating endpoints/services (if any) and rank by compliance/risk impact.
-
-**Deliverables**
-- Ranked backlog of uncovered write flows with recommended implementation order.
-- Quick regression evidence for currently covered flows.
-
-#### WS2 — Operational Hardening Slice
-
-- Define concrete hardening tasks for hash-chain operations (failure visibility, runbook checks, deploy-time verification).
-- Decide minimal CI evidence set for chain integrity and idempotency protections.
+- Implement audit event emission for `GameController`, `SetController`, and `ProductController` mutating actions: `store`, `update`, `destroy`.
+- Standardize event naming (`catalog.game.created`, `catalog.game.updated`, etc.) and include actor/context payload parity with existing patterns.
 
 **Deliverables**
-- Actionable hardening checklist (CI command set + ownership notes).
-- Proposed threshold for blocking releases on audit-chain failures.
+- Controller/service updates for all catalog mutating endpoints.
+- Feature tests validating event creation + hash chain continuity for catalog write flows.
 
-#### WS3 — Documentation/Status Sync Follow-Through
+#### WS2 — Inventory CRUD Audit Coverage (Non-Transfer/Adjust)
 
-- Update authoritative status documents after WS1/WS2 scope decisions are finalized.
-- Ensure roadmap/progress wording distinguishes completed scope from next-iteration commitments.
+- Add audit event emission for `InventoryItemController` mutating CRUD actions already outside transfer/adjust coverage: `store`, `update`, `destroy`.
+- Preserve idempotency behavior for request-key protected operations and avoid duplicate audit rows.
 
 **Deliverables**
-- Updated status wording checklist for `README.md`, `PROGRESS.md`, and `ROADMAP.md`.
+- Inventory CRUD audit hooks with deterministic event payloads.
+- Regression tests proving existing `transfer`/`adjust-stock` audit behavior remains stable.
+
+#### WS3 — Verification + Status Sync Completion
+
+- Run agreed quality gates for lint, targeted API tests, static analysis, and chain verification.
+- After implementation evidence is captured, update status wording in `README.md`, `PROGRESS.md`, and `ROADMAP.md` for Phase-4 scope accuracy.
+
+**Deliverables**
+- Command evidence log in this plan entry.
+- Follow-up doc-sync checklist ready for closeout.
 
 ### 5) Verification Evidence Requirements
 
-Before this plan can move from `draft` to `in_progress`:
+Before this plan can move from `in_progress` to `completed`:
 
-1. A selected next implementation target is documented with explicit in-scope endpoints/services.
-2. Verification command set is listed (lint/tests/static analysis + chain verification path).
-3. Risks for the chosen slice are captured with at least one mitigation each.
+1. Audit coverage exists for catalog + inventory CRUD mutating endpoints listed in WS1/WS2.
+2. Verification command set has recorded outcomes:
+   - `vendor/bin/pint --test <touched-files>`
+   - `php artisan test tests/Feature/Api/GameApiTest.php tests/Feature/Api/SetApiTest.php tests/Feature/Api/ProductApiTest.php tests/Feature/Api/InventoryItemApiTest.php tests/Feature/Api/FinanceApiTest.php`
+   - `vendor/bin/phpstan analyse --memory-limit=1G`
+   - `php artisan audit:verify-chain` (or documented environment limitation)
+3. Existing finance + inventory transfer/adjust chain assertions continue to pass.
 
 ### 6) Risks and Mitigations
 
-- **Risk:** Expanding scope too broadly and delaying delivery.
-  - **Mitigation:** time-box selection and commit to a single highest-impact slice first.
-- **Risk:** Regressions in existing audited flows while adding coverage.
-  - **Mitigation:** require targeted regression tests for finance + inventory paths in every follow-up PR.
-- **Risk:** Operational blind spots despite functional correctness.
-  - **Mitigation:** include explicit runbook/CI chain-integrity checks in acceptance criteria.
+- **Risk:** Event taxonomy fragmentation across controllers.
+  - **Mitigation:** define a consistent naming convention before coding and assert exact types in feature tests.
+- **Risk:** Duplicate or missing events around delete/update edge cases.
+  - **Mitigation:** use post-commit logging pattern already proven in finance/inventory services and test create/update/destroy triplets.
+- **Risk:** Chain verification command is environment-sensitive (missing sqlite file).
+  - **Mitigation:** run command where possible and explicitly log the known environment constraint when it cannot execute.
 
 ### 7) Exit Criteria (Definition of Done)
 
-1. Next engineering slice is selected and decomposed into implementable tasks.
-2. Verification gates are documented and runnable.
-3. Status-doc synchronization tasks are queued with clear ownership.
+1. Catalog + inventory CRUD write paths emit hash-chain audit events with actor/context payloads.
+2. Targeted API tests validate event types, chain links, and no regressions in existing audited flows.
+3. Quality gates and chain verification evidence are recorded, and status docs have an explicit sync checklist.
 
 ### 8) Decision Log
 
-- **2026-03-12:** Chose a planning-only entry to unblock immediate prioritization without introducing unvalidated scope changes.
-- **2026-03-12:** Prioritized correctness/operability hardening ahead of broad feature expansion.
+- **2026-03-12:** Selected WS1+WS2 (remaining mutating CRUD audit coverage) as the immediate next phase because it closes the largest compliance gap with minimal architecture churn.
+- **2026-03-12:** Deferred operations hardening depth to the following slice once write-flow audit completeness is achieved.
 
 ### 9) Execution Checklist (Current Run)
 
 - [x] Reviewed latest completed plan entries for current-state grounding.
-- [x] Captured immediate next-step workstreams and deliverables.
-- [x] Defined verification prerequisites for activating the next implementation plan.
-- [ ] Confirm selected next implementation slice and flip plan status to `in_progress`.
+- [x] Confirmed uncovered mutating endpoints from `routes/api.php` and current audit-enabled controllers/services.
+- [x] Selected next implementation slice: catalog + inventory CRUD audit coverage.
+- [x] Flipped plan status to `in_progress` with explicit verification command set.
+- [ ] Implement WS1 catalog audit hooks and tests.
+- [ ] Implement WS2 inventory CRUD audit hooks and regression tests.
+- [ ] Run WS3 verification gates and capture evidence.
+- [ ] Execute status-doc sync checklist after implementation proof.
+
+### 10) Selected Scope Evidence (Planning Pass)
+
+- Mutating endpoints inventory from `routes/api.php` confirms catalog/inventory CRUD write surfaces remain in scope (`games`, `sets`, `products`, `inventory-items` with store/update/destroy).
+- Existing audit integration currently appears in finance controllers and inventory transfer/adjust services, establishing reuse baseline for the next implementation slice.
