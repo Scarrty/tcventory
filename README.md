@@ -12,7 +12,7 @@ TCventory ist eine API- und Backoffice-Anwendung für TCG-Katalog, Inventar und 
 - **Phase 0/1:** abgeschlossen (Plattform, Auth, RBAC, Migrationen, Filament-Basis)
 - **Phase 2:** abgeschlossen (Katalog/Inventar-CRUD inkl. Transfer und Stock-Adjust)
 - **Phase 3:** abgeschlossen (Purchases, Sales, Valuations, erweitertes Finance Summary Reporting)
-- **Phase 4:** in Umsetzung (Audit-Hash-Chain für Finance- und Inventory-Write-Flows inkl. CI-Integritätsgate)
+- **Phase 4:** gestartet (Audit-Hash-Chain für Finance-Write-Flows inkl. Verifikationskommando)
 - **Phase 5:** geplant (Skalierung/Integrationen)
 
 Siehe: `docs/README.md` (Dokumentationslandkarte), `ROADMAP.md` (Plan), `PROGRESS.md` (Live-Ist).
@@ -38,7 +38,7 @@ Spezifikationen nach Zielgruppe:
 - Finance-Module: `purchases`, `sales`, `valuations`
 - Finance-Report: `GET /api/v1/reports/finance-summary` (periodisiert, channel-filterbar, KPI-Breakdown)
 - Token-basierte API-Authentifizierung via Sanctum (`POST /api/v1/tokens`, `GET /api/v1/me`)
-- Audit-Integrität: `php artisan audit:verify-chain` (lokal + als CI-Gate)
+- Audit-Integrität: `php artisan audit:verify-chain`
 
 ## Voraussetzungen
 

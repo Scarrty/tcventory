@@ -602,8 +602,8 @@ This plan is done when:
 
 ## PLAN-2026-03-12-NEXT-STEPS-ORCHESTRATION — Immediate Execution Plan (Post Phase-4 Inventory Audit Expansion)
 
-- **Status:** `completed`
-- **Owner:** Codex implementation pass
+- **Status:** `draft`
+- **Owner:** Codex planning pass
 - **Last Updated:** 2026-03-12
 
 ### 1) Context Snapshot
@@ -620,8 +620,8 @@ This plan is done when:
 
 ### 3) Non-Objectives
 
-- No broad audit rollout across every remaining write path in this run.
-- No refactor of completed Phase-3/Phase-4 domain services.
+- No new feature implementation in this planning-only pass.
+- No refactor of completed Phase-3/Phase-4 flows.
 - No speculative long-term architecture redesign.
 
 ### 4) Workstreams and Deliverables
@@ -685,21 +685,4 @@ Before this plan can move from `draft` to `in_progress`:
 - [x] Reviewed latest completed plan entries for current-state grounding.
 - [x] Captured immediate next-step workstreams and deliverables.
 - [x] Defined verification prerequisites for activating the next implementation plan.
-- [x] Confirm selected next implementation slice and flip plan status to `in_progress`.
-- [x] Implement selected hardening slice in CI (`audit:verify-chain` gate).
-- [x] Synchronize status docs (`README.md`, `PROGRESS.md`, `ROADMAP.md`).
-- [x] Record verification evidence and close the plan as `completed`.
-
-
-### 10) Implementation Outcome (Current Run)
-
-- **Selected next slice:** WS2 operational hardening first, implemented as a CI release gate that runs `php artisan audit:verify-chain` after migrations/tests.
-- **Scope decision rationale:** this provides immediate operational confidence with minimal delivery risk while preserving momentum for broader audit-coverage expansion in follow-up slices.
-- **Queued follow-up:** expand hash-chain coverage to remaining catalog/inventory CRUD write flows in a dedicated implementation plan.
-
-### 11) Verification Evidence Log (Current Run)
-
-- `composer install --no-interaction --no-progress --prefer-dist` ✅
-- `php artisan test tests/Feature/Api/FinanceApiTest.php tests/Feature/Api/InventoryItemApiTest.php` ✅ (passes with known frontend-manifest warnings in this CLI environment).
-- `php artisan audit:verify-chain` ⚠️ (fails locally because default sqlite file `/workspace/tcventory/database/database.sqlite` is not present; CI gate runs against migrated Postgres service in workflow job).
-- `git diff -- .github/workflows/ci.yml README.md PROGRESS.md ROADMAP.md PLANS.md tasks/lessons.md` ✅
+- [ ] Confirm selected next implementation slice and flip plan status to `in_progress`.

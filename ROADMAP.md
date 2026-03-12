@@ -43,10 +43,10 @@ TCventory entwickelt sich zur produktionsnahen Inventar- und Finanzplattform fü
 
 ## Phase 4 – Audit, Reporting & Operations (gestartet)
 
-- Audit-Hash-Chain für Finance- und Inventory-Write-Flows implementiert
-- Integritätsprüfung via `php artisan audit:verify-chain` vorhanden (lokal + als CI-Gate)
+- Audit-Hash-Chain für Finance-Write-Flows implementiert
+- Integritätsprüfung via `php artisan audit:verify-chain` vorhanden
 - Nächste Schritte:
-  - Audit-Abdeckung auf weitere kritische Write-Flows ausweiten (priorisiert: Catalog-CRUD)
+  - Audit-Abdeckung auf weitere kritische Write-Flows ausweiten
   - Operations-Reife (Runbooks/Horizon/Sentry) vervollständigen
   - zusätzliche Reports (`inventory-value`, `profit-loss`) produktivisieren
 
